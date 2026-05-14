@@ -210,3 +210,23 @@ export type MileageViewResponse = ApiResponse<{
 export type MileageUpdateResponse = ApiResponse<{
     mileageEntry?: MileageEntry;
 }>;
+
+
+/* TEMPORARY FOR FIRST BUILD */
+export type ExpenseForExports = {
+  id: string;
+  user_email?: string;
+  submitter_name?: string;
+  purchase_date?: string;
+  account?: string;
+  vendor?: string;
+  amount?: number;
+  category?: string;
+  reason?: string;
+  notes?: string;
+  receipt_available?: number | boolean;
+  already_submitted?: number | boolean;
+  store_ids?: string;
+  llc?: string;
+  created_at?: string;
+};
