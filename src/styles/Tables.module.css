@@ -1,0 +1,164 @@
+.wrap {
+    padding: 16px 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search {
+    min-width: 260px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.meta {
+    margin: 10px 0 6px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.tableWrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 14px;
+    background: var(--bg-card);
+}
+
+.favoritesHeader {
+    background: var(--bg-card) !important;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 18px;
+    position: relative;
+    color: var(--text-primary);
+}
+
+.favoritesButton {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: 300;
+    font-size: 14px;
+    transition: 0.2s ease;
+    color: var(--text-muted);
+}
+
+.favoritesButton:hover {
+    text-decoration: underline;
+    font-size: 1rem;
+    transition: 0.2s ease;
+    color: var(--text-primary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 14px;
+    background: var(--bg-card);
+}
+
+.table thead th,
+.table thead h2 {
+    text-align: center;
+    background: var(--btn-primary);
+    color: var(--bg-card);
+    position: sticky;
+    top: 0;
+    padding: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.table thead h2 {
+    background: var(--bg-card);
+}
+
+.secondHeader {
+    text-align: left;
+    background: var(--text-muted);
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    color: var(--bg-card);
+    min-width: max-content;
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+    text-align: center;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.subtle {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.left {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.right {
+    text-align: right;
+    color: var(--text-primary);
+}
+
+.empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 0;
+}
+
+.newCustomerPrompt {
+    margin-top: -8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.newCustomerPrompt button {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+}

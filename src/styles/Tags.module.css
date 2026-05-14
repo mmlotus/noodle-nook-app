@@ -1,0 +1,35 @@
+.tagSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tagSelector select {
+  color: var(--text-primary);
+  background-color: var(--bg);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background: var(--text-primary);
+  color: var(--bg);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  margin-left: 4px;
+  cursor: pointer;
+  color: var(--btn-hover);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,36 @@
+/* Fix weird spacing and buttons */
+.react-datepicker__month-year-dropdown-container--select {
+  width: 100%;
+}
+
+.react-datepicker__month-year-dropdown {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.react-datepicker__month-year-option {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.react-datepicker__month-year-option:hover {
+  background-color: #f0f0f0;
+}
+
+.react-datepicker__navigation--years {
+  display: none;
+}
+
+.react-datepicker__header {
+  background-color: white;
+  border-bottom: none;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}

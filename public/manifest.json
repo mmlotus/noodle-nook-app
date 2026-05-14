@@ -1,0 +1,25 @@
+{
+    "name": "NoodleNook",
+    "short_name": "NoodleNook",
+    "description": "Manage your world from weight to books, notes to budgets, & more.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#fdf7ef",
+    "theme_color": "#493854",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/icons/NoodleNook-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/NoodleNook-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

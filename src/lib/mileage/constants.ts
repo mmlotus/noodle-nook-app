@@ -1,0 +1,3 @@
+export const DEFAULT_MILEAGE_REIMB_RATE = 0.70;
+
+export const GAS_PAID_MILEAGE_REIMB_RATE = 0.35;
