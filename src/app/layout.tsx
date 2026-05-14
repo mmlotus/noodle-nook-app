@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
-import PWARegister from "./components/PWARegister";
+import PWARegister from "@/components/PWARegister";
 
 const quicksand = Quicksand({
   subsets: ["latin"],
