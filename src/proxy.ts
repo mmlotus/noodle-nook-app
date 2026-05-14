@@ -5,14 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 const publicRoutes = [
     "/",
     "/login",
-    "/devmode",
-    "/verify",
+    "/register",
 ];
 
 const publicApiRoutes = [
     "/api/auth",
-    "/api/profiles/verify",
-    "/api/profiles/resend",
+    "/api/register",
 ];
 
 function isPublicRoute(pathname: string) {
@@ -36,7 +34,7 @@ function isStaticAsset(pathname: string) {
         /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf)$/i.test(pathname)
     );
 }
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     if (isStaticAsset(pathname) || isPublicApiRoute(pathname)) {
