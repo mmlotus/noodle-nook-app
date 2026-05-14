@@ -4,7 +4,7 @@ import Link from "next/link";
 import navStyles from "./Navbar.module.css";
 import { signOut } from "next-auth/react";
 import { useCurrentUser } from "@/lib/useCurrentUser";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -14,19 +14,8 @@ export default function Navbar() {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const closeMenu = () => setMenuOpen(false);
-    const [org, setOrg] = useState("default");
 
     useEffect(() => {
-        if (
-            pathname === "/login" ||
-            pathname === "/devmode" ||
-            !isAuthenticated
-        ) {
-            setOrg("default");
-        } else {
-            setOrg(user.org || "default");
-        }
-
         if (!menuOpen) return;
 
         const handleClick = (e: MouseEvent) => {
@@ -72,7 +61,7 @@ export default function Navbar() {
     const expenseNavLabel = isMileagePage ? "My Mileage" : "My Expenses";
 
     return (
-        <nav className={`${navStyles.nav} ${navStyles[org]}`}>
+        <nav className={navStyles.nav}>
             <div className={navStyles.title}>{expenseNavLabel}</div>
 
             {/* Only show links if user is logged in */}
