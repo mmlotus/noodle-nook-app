@@ -229,4 +229,5 @@ export type ExpenseForExports = {
   store_ids?: string;
   llc?: string;
   created_at?: string;
+  org?: string;
 };
