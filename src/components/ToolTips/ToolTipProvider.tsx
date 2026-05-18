@@ -28,14 +28,12 @@ export function ToolTipProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        console.log("session status:", status);
-
         const fetchTooltips = async () => {
             const res = await fetch("/api/user-tooltips");
             if (!res.ok) return console.error("Failed to load tooltips");
 
             const data = await res.json();
-            setDismissed(data.dismiss || []);
+            setDismissed(data.dismissed || []);
             setTooltipsEnabledState(data.tooltipsEnabled ?? true);
         };
         fetchTooltips();

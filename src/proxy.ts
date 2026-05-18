@@ -6,6 +6,7 @@ const publicRoutes = [
     "/",
     "/login",
     "/register",
+    "/forgot-password",
 ];
 
 const publicApiRoutes = [
