@@ -7,7 +7,6 @@
     "display": "standalone",
     "background_color": "#fdf7ef",
     "theme_color": "#493854",
-    "orientation": "portrait",
     "icons": [
         {
             "src": "/icons/NoodleNook-192x192.png",
