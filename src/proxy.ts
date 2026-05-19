@@ -7,6 +7,8 @@ const publicRoutes = [
     "/login",
     "/register",
     "/forgot-password",
+    "/privacy",
+    "/terms",
 ];
 
 const publicApiRoutes = [
