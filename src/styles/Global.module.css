@@ -1,6 +1,6 @@
 /* LAYOUTS */
 .wrap {
-    padding: 16px 20px;
+  padding: 16px 20px;
 }
 
 .pageWrapper {
@@ -10,21 +10,38 @@
   flex-direction: column;
 }
 
+.authContainer {
+  width: min(100% - 32px, 640px);
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+
 .container,
 .keyPanel {
-  display: flex;
-  background: var(--bg);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .container {
-  width: 100%;
+  background: var(--bg);
+  max-width: 900px;
   margin: 2rem auto;
   padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .keyPanel {
+  background: var(--bg-alt);
+  display: flex;
   padding: 16px;
   width: 100%;
   margin: 0.5rem;
@@ -61,6 +78,13 @@
 .viewMode p {
   font-size: 1rem;
   margin: 0.5rem 0;
+}
+
+.centeredColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .centeredPanel {
@@ -190,10 +214,10 @@
 
 /* ===== Typography ===== */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .heading,
@@ -418,6 +442,7 @@
 
 .buttonBrand {
   background: var(--brand) !important;
+  color: white !important;
 }
 
 .button:hover {
@@ -838,9 +863,16 @@
     display: none;
   }
 
+  .authContainer {
+    width: min(100% - 24px, 640px);
+    margin: 1rem auto;
+    padding: 1.25rem;
+  }
+
   .authForm {
     grid-template-columns: 1fr;
     max-width: 100%;
+    width: 100%;
     justify-content: stretch;
   }
 

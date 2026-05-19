@@ -190,7 +190,7 @@ function LoginContent() {
 
     return (
         <main className={global.pageWrapper}>
-            <section className={global.container}>
+            <section className={global.authContainer}>
                 <div className={global.centeredColumn}>
                     <Image
                         className={global.authLogo}
