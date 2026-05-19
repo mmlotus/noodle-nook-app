@@ -202,7 +202,7 @@ export default function ForgotPasswordPage() {
 
                 {step === "email" && (
                     <form className={global.authForm} onSubmit={handleEmailSubmit}>
-                        <label className={global.label} htmlFor="email">Email</label>
+                        <label className={global.label}>Email</label>
                         <input
                             id="email"
                             type="email"
@@ -239,7 +239,7 @@ export default function ForgotPasswordPage() {
 
                         {questions.map((item, index) => (
                             <div key={item.questionOrder} className={global.securityQuestionGroup}>
-                                <label className={global.label} htmlFor={`securityAnswer${item.questionOrder}`}>
+                                <label className={global.label}>
                                     Question {item.questionOrder}
                                 </label>
 
@@ -247,7 +247,7 @@ export default function ForgotPasswordPage() {
                                     {item.question}
                                 </p>
 
-                                <label className={global.label} htmlFor={`securityAnswer${item.questionOrder}`}>
+                                <label className={global.label}>
                                     Answer {item.questionOrder}
                                 </label>
 
@@ -264,7 +264,7 @@ export default function ForgotPasswordPage() {
                         ))}
 
                         <p className={global.formSectionTitle}>New Password</p>
-                        <label className={global.label} htmlFor="password">New Password</label>
+                        <label className={global.label}>New Password</label>
 
                         <input
                             id="password"
@@ -328,7 +328,7 @@ export default function ForgotPasswordPage() {
                             </p>
                         </div>
 
-                        <label className={global.label} htmlFor="confirmPassword">Confirm Password</label>
+                        <label className={global.label}>Confirm Password</label>
                         <input
                             id="confirmPassword"
                             type="password"

@@ -225,7 +225,7 @@ function LoginContent() {
                 <form className={global.authForm} onSubmit={handleSubmit}>
                     {mode === "register" && (
                         <>
-                            <label className={global.label} htmlFor="name">Name</label>
+                            <label className={global.label}>Name</label>
                             <input
                                 id="name"
                                 type="text"
@@ -238,7 +238,7 @@ function LoginContent() {
                         </>
                     )}
 
-                    <label className={global.label} htmlFor="email">Email</label>
+                    <label className={global.label}>Email</label>
                     <input
                         id="email"
                         type="email"
@@ -249,7 +249,7 @@ function LoginContent() {
                         required
                     />
 
-                    <label className={global.label} htmlFor="password">Password</label>
+                    <label className={global.label}>Password</label>
                     <input
                         id="password"
                         type="password"
@@ -262,7 +262,7 @@ function LoginContent() {
 
                     {mode === "register" && (
                         <>
-                            <label className={global.label} htmlFor="confirmPassword">Confirm Password</label>
+                            <label className={global.label}>Confirm Password</label>
                             <input
                                 id="confirmPassword"
                                 type="password"
@@ -343,7 +343,7 @@ function LoginContent() {
 
                             {securityQuestions.map((item, index) => (
                                 <div key={index} className={global.securityQuestionGroup}>
-                                    <label className={global.label} htmlFor={`securityQuestion${index}`}>
+                                    <label className={global.label}>
                                         Security Question {index + 1}
                                     </label>
 
@@ -363,7 +363,7 @@ function LoginContent() {
                                         ))}
                                     </select>
 
-                                    <label className={global.label} htmlFor={`securityAnswer${index}`}>
+                                    <label className={global.label}>
                                         Security Answer {index + 1}
                                     </label>
 

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/app/api/auth/userHelpers";
 import { NextRequest, NextResponse } from "next/server";
 
 const allowedThemes = ["system", "light", "dark"];
+const allowedWeightUnits = ["lb", "kg", "g", "st"];
 
 export async function GET(req: NextRequest) {
     let userEmail = "";
@@ -16,7 +17,15 @@ export async function GET(req: NextRequest) {
 
     try {
         const result = await db.query(
-            "SELECT id, email, name, subtitle_choice, theme_preference FROM users WHERE email = $1",
+            `SELECT
+                id,
+                email,
+                name,
+                subtitle_choice,
+                theme_preference,
+                preferred_weight_unit
+            FROM users WHERE email = $1
+            `,
             [userEmail]
         );
 
@@ -48,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { name, subtitle_choice, theme_preference } = await req.json();
+        const { name, subtitle_choice, theme_preference, preferred_weight_unit } = await req.json();
 
         if (!name || typeof name !== "string") {
             return NextResponse.json({ error: "Invalid name" }, { status: 400 });
@@ -62,20 +71,30 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        if (preferred_weight_unit !== undefined && (typeof preferred_weight_unit !== "string" || !allowedWeightUnits.includes(preferred_weight_unit))
+        ) {
+            return NextResponse.json(
+                { error: "Preferred weight unit is invalid" },
+                { status: 400 }
+            );
+        }
+
         const result = await db.query(
             `
                 UPDATE users
                 SET
                     name = $1,
                     subtitle_choice = $2,
-                    theme_preference = $3
-                WHERE email = $4
-                RETURNING id, email, name, subtitle_choice, theme_preference
+                    theme_preference = $3,
+                    preferred_weight_unit = $4
+                WHERE email = $5
+                RETURNING id, email, name, subtitle_choice, theme_preference, preferred_weight_unit
             `,
             [
                 name.trim(),
                 subtitle_choice || "",
                 theme_preference || "system",
+                preferred_weight_unit || "lb",
                 userEmail,
             ]
         );

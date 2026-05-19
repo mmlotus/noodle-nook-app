@@ -1,3 +1,5 @@
+import { WeightUnit } from "@/lib/weight/weightUtils";
+
 export type Kind = string | number | boolean | null | undefined;
 
 export type User = {
@@ -16,4 +18,8 @@ export type UserRow = {
     tooltips_enabled: number;
     dismissed_tooltips: string | null;
     theme_preference: "system" | "light" | "dark";
+    subtitle_choice: string | null;
+    preferred_weight_unit: WeightUnit | null;
 };
+
+export type ChartRange = "7d" | "30d" | "90d" | "6m" | "1y" | "all";

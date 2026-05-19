@@ -110,7 +110,7 @@ export default function ChangePasswordPage() {
                 </div>
 
                 <form className={global.authForm} onSubmit={handleSubmit}>
-                    <label className={global.label} htmlFor="currentPassword">Current Password</label>
+                    <label className={global.label}>Current Password</label>
                     <input
                         id="currentPassword"
                         type="password"
@@ -121,7 +121,7 @@ export default function ChangePasswordPage() {
                         required
                     />
 
-                    <label className={global.label} htmlFor="newPassword">New Password</label>
+                    <label className={global.label}>New Password</label>
                     <input
                         id="newPassword"
                         type="password"
@@ -184,7 +184,7 @@ export default function ChangePasswordPage() {
                         </p>
                     </div>
 
-                    <label className={global.label} htmlFor="confirmPassword">Confirm Password</label>
+                    <label className={global.label}>Confirm Password</label>
                     <input
                         id="confirmPassword"
                         type="password"

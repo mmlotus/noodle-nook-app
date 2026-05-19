@@ -1,0 +1,393 @@
+.weightPage {
+    width: 100%;
+    padding: 32px 20px 64px;
+}
+
+.section {
+    width: min(1180px, 100%);
+    margin: 0 auto 28px;
+    padding: 28px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sectionHeader {
+    margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+}
+
+.sectionHeader p {
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.quickEntryGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 180px;
+    gap: 18px;
+    align-items: end;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.notesField {
+    grid-column: 1 / -1;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.chartShell {
+    width: 100%;
+    min-width: 0;
+    height: 360px;
+    min-height: 360px;
+}
+
+.emptyChart {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-alt);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 24px;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.statCard {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+}
+
+.statLabel {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.statValue {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* HISTORY SECTION */
+
+.historyHeaderRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.historyHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.activeSortText {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.sortMenuWrap {
+    position: relative;
+}
+
+.sortIconButton {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-alt);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.sortIconButton:hover {
+    background: var(--bg);
+    border-color: var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.sortDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 250px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    padding: 8px;
+    z-index: 20;
+}
+
+.sortOption,
+.sortOptionActive {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.sortOption:hover {
+    background: var(--bg-alt);
+}
+
+.sortOptionActive {
+    background: var(--brand);
+    color: var(--bg);
+    font-weight: 600;
+}
+
+.historyFilters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+
+.filterField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filterActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-bottom: 10px;
+}
+
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.historyItem {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.historyDetails {
+    display: grid;
+    grid-template-columns: 160px 160px 1fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.historyLabel {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.historyValue {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.historyActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.preferenceRow {
+    display: grid;
+    grid-template-columns: 180px minmax(220px, 360px);
+    gap: 14px;
+    align-items: center;
+}
+
+/* CHARTS */
+.chartHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.chartHeaderRow .sectionHeader {
+    margin-bottom: 0;
+}
+
+.chartRangeControls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.rangeButton,
+.rangeButtonActive {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.rangeButton {
+    background: var(--bg-alt);
+    color: var(--text);
+}
+
+.rangeButton:hover {
+    background: var(--bg);
+    border-color: var(--text-muted);
+    transform: translateY(-1px);
+}
+
+.rangeButtonActive {
+    background: var(--brand);
+    color: var(--bg);
+    border-color: var(--brand);
+    font-weight: 700;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+    .quickEntryGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .historyItem {
+        grid-template-columns: 1fr;
+    }
+
+    .historyDetails {
+        grid-template-columns: 1fr;
+    }
+
+    .historyActions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 700px) {
+    .historyHeaderRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .historyHeaderActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sortDropdown {
+        right: 0;
+        width: min(250px, 80vw);
+    }
+
+    .historyFilters {
+        grid-template-columns: 1fr;
+    }
+
+    .filterActions {
+        padding-bottom: 0;
+        justify-content: flex-start;
+    }
+
+    .chartHeaderRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chartRangeControls {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .weightPage {
+        padding: 20px 12px 48px;
+    }
+
+    .section {
+        padding: 18px;
+    }
+
+    .quickEntryGrid,
+    .statsGrid,
+    .preferenceRow {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        justify-content: stretch;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

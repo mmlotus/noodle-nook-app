@@ -1,4 +1,8 @@
 /* LAYOUTS */
+.wrap {
+    padding: 16px 20px;
+}
+
 .pageWrapper {
   background: var(--bg);
   min-height: 100vh;
@@ -8,22 +12,19 @@
 
 .container,
 .keyPanel {
+  display: flex;
+  background: var(--bg);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .container {
-  background: var(--bg);
-  max-width: 900px;
+  width: 100%;
   margin: 2rem auto;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .keyPanel {
-  background: var(--bg-alt);
-  display: flex;
   padding: 16px;
   width: 100%;
   margin: 0.5rem;
@@ -188,12 +189,24 @@
 
 
 /* ===== Typography ===== */
-.heading {
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.heading,
+.pageHeader {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1rem;
   color: var(--btn-primary);
   text-align: center;
+}
+
+.pageHeader {
+  margin-top: 20px;
 }
 
 .headLeft {
@@ -487,6 +500,20 @@
   text-decoration: underline;
   cursor: pointer;
   color: var(--btn-primary);
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--btn-secondary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  color: #222;
+  text-decoration: underline;
 }
 
 /* UTILITIES */
