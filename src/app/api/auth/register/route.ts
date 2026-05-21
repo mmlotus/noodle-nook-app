@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getUserByEmail } from "../userHelpers";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import db from "@/lib/db";
 import { validatePassword } from "@/lib/passwordRules";
 import { hashSecurityAnswer, isValidSecurityQuestion } from "@/lib/securityQuestions";
+import { jsonError, jsonOk, serverError } from "@/lib/api/apiUtils";
 
 type SecurityQuestionInput = {
     question?: string;
@@ -23,38 +24,23 @@ export async function POST(req: NextRequest) {
         const securityQuestions = body.securityQuestions;
 
         if (!name || !email || !password || !confirmPassword) {
-            return NextResponse.json(
-                { error: "Please fill out all fields." },
-                { status: 400 }
-            );
+            return jsonError("Please fill out all fields.", 400);
         }
 
         if (!email.includes("@")) {
-            return NextResponse.json(
-                { error: "Please enter a valid email address." },
-                { status: 400 }
-            );
+            return jsonError("Please enter a valid email address.", 400);
         }
 
         if (password !== confirmPassword) {
-            return NextResponse.json(
-                { error: "Passwords do not match." },
-                { status: 400 }
-            );
+            return jsonError("Passwords do not match.", 400);
         }
 
         if (!passwordCheck.isValid) {
-            return NextResponse.json(
-                { error: passwordCheck.errors[0], errors: passwordCheck.errors },
-                { status: 400 }
-            );
+            return jsonError(passwordCheck.errors[0], 400);
         }
 
         if (!Array.isArray(securityQuestions) || securityQuestions.length !== 3) {
-            return NextResponse.json(
-                { error: "Three security questions are required." },
-                { status: 400 }
-            );
+            return jsonError("Three security questions are required.", 400);
         }
 
         const cleanedSecurityQuestions = securityQuestions.map(
@@ -66,17 +52,11 @@ export async function POST(req: NextRequest) {
         );
 
         if (cleanedSecurityQuestions.some((item) => !item.question || !item.answer)) {
-            return NextResponse.json(
-                { error: "All security questions and answers are required." },
-                { status: 400 }
-            );
+            return jsonError("All security questions and answers are required.", 400);
         }
 
         if (cleanedSecurityQuestions.some((item) => !isValidSecurityQuestion(item.question))) {
-            return NextResponse.json(
-                { error: "Please choose valid security questions." },
-                { status: 400 }
-            );
+            return jsonError("Please choose valid security questions.", 400);
         }
 
         const uniqueQuestions = new Set(
@@ -84,26 +64,17 @@ export async function POST(req: NextRequest) {
         );
 
         if (uniqueQuestions.size !== 3) {
-            return NextResponse.json(
-                { error: "Security questions must be different." },
-                { status: 400 }
-            );
+            return jsonError("Security questions must be different.", 400);
         }
 
         if (cleanedSecurityQuestions.some((item) => item.answer.length < 2)) {
-            return NextResponse.json(
-                { error: "Security answers must be at least 2 characters." },
-                { status: 400 }
-            );
+            return jsonError("Security answers must be at least 2 characters.", 400);
         }
 
         const existingUser = await getUserByEmail(email);
 
         if (existingUser) {
-            return NextResponse.json(
-                { error: "An account already exists with this email." },
-                { status: 409 }
-            );
+            return jsonError("An account already exists with this email.", 409);
         }
 
         const passwordHash = await bcrypt.hash(password, 12);
@@ -145,25 +116,12 @@ export async function POST(req: NextRequest) {
 
             await db.query("COMMIT");
 
-            return NextResponse.json(
-                { user: result[0] },
-                { status: 201 }
-            );
+            return jsonOk({ user: result[0] }, 201);
         } catch (error) {
             await db.query("ROLLBACK");
-            console.error("Register transaction error:", error);
-
-            return NextResponse.json(
-                { error: "Something went wrong while creating your account." },
-                { status: 500 }
-            );
+            return serverError("Register transaction", error);
         }
     } catch (error) {
-        console.error("Register error:", error);
-
-        return NextResponse.json(
-            { error: "Something went wrong while creating your account." },
-            { status: 500 }
-        );
+        return serverError("Register", error);
     }
 }

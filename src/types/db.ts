@@ -3,7 +3,7 @@ import { WeightUnit } from "@/lib/weight/weightUtils";
 export type Kind = string | number | boolean | null | undefined;
 
 export type User = {
-    id: number;
+    id: string;
     email: string;
     name: string | null;
     password_hash: string;
@@ -11,7 +11,7 @@ export type User = {
 };
 
 export type UserRow = {
-    id: number;
+    id: string;
     email: string;
     name: string | null;
     created_at: Date | string | null;

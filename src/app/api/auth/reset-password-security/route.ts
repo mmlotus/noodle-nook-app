@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import db from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { validatePassword } from "@/lib/passwordRules";
 import { compareSecurityAnswer } from "@/lib/securityQuestions";
+import { jsonError, jsonOk, serverError } from "@/lib/api/apiUtils";
 
 type SecurityAnswerInput = {
     questionOrder?: number;
@@ -19,17 +20,11 @@ export async function POST(req: NextRequest) {
         const answers = body.answers;
 
         if (!email || !password || !confirmPassword) {
-            return NextResponse.json(
-                { error: "Email, password, and confirm password are required." },
-                { status: 400 }
-            );
+            return jsonError("Email, password, and confirm password are required.", 400);
         }
 
         if (!Array.isArray(answers) || answers.length !== 3) {
-            return NextResponse.json(
-                { error: "All three security answers are required." },
-                { status: 400 }
-            );
+            return jsonError("All three security answers are required.", 400);
         }
 
         const cleanedAnswers = answers.map((item: SecurityAnswerInput) => ({
@@ -42,38 +37,21 @@ export async function POST(req: NextRequest) {
             ![1, 2, 3].includes(item.questionOrder) ||
             !item.answer
         )) {
-            return NextResponse.json(
-                { error: "All three security answers are required." },
-                { status: 400 }
-            );
+            return jsonError("All three security answers are required.", 400);
         }
 
         const uniqueQuestionOrders = new Set(cleanedAnswers.map((item) => item.questionOrder));
 
         if (uniqueQuestionOrders.size !== 3) {
-            return NextResponse.json(
-                { error: "Security answers are invalid." },
-                { status: 400 }
-            );
+            return jsonError("Security answers are invalid.", 400);
         }
 
-        if (password !== confirmPassword) {
-            return NextResponse.json(
-                { error: "Passwords do not match." },
-                { status: 400 }
-            );
-        }
+        if (password !== confirmPassword) return jsonError("Passwords do not match.", 400);
 
         const passwordCheck = validatePassword(password);
 
         if (!passwordCheck.isValid) {
-            return NextResponse.json(
-                {
-                    error: passwordCheck.errors[0],
-                    errors: passwordCheck.errors,
-                },
-                { status: 400 }
-            );
+            return jsonError(passwordCheck.errors[0], 400);
         }
 
         const userResult = await db.query(
@@ -87,10 +65,7 @@ export async function POST(req: NextRequest) {
         );
 
         if (userResult.length === 0) {
-            return NextResponse.json(
-                { error: "Could not reset password." },
-                { status: 400 }
-            );
+            return jsonError("Could not reset password.", 400);
         }
 
         const user = userResult[0];
@@ -108,9 +83,9 @@ export async function POST(req: NextRequest) {
         );
 
         if (savedQuestions.length !== 3) {
-            return NextResponse.json(
-                { error: "This account does not have all three security questions set up." },
-                { status: 400 }
+            return jsonError(
+                "This account does not have all three security questions set up.",
+                400
             );
         }
 
@@ -118,10 +93,7 @@ export async function POST(req: NextRequest) {
             const matchingAnswer = cleanedAnswers.find((item) => item.questionOrder === savedQuestion.questionOrder);
 
             if (!matchingAnswer) {
-                return NextResponse.json(
-                    { error: "Security answers are invalid." },
-                    { status: 400 }
-                );
+                return jsonError("Security answers are invalid.", 400);
             }
 
             const answerMatches = await compareSecurityAnswer(
@@ -130,10 +102,7 @@ export async function POST(req: NextRequest) {
             );
 
             if (!answerMatches) {
-                return NextResponse.json(
-                    { error: "One or more security answers are incorrect." },
-                    { status: 400 }
-                );
+                return jsonError("One or more security answers are incorrect.", 400);
             }
         }
 
@@ -150,16 +119,8 @@ export async function POST(req: NextRequest) {
             [passwordHash, user.id]
         );
 
-        return NextResponse.json(
-            { message: "Password reset successfully!" },
-            { status: 200 }
-        );
+        return jsonOk({ message: "Password reset successfully!" });
     } catch (err) {
-        console.error("Security password reset error:", err);
-
-        return NextResponse.json(
-            { error: "Something went wrong while resetting your password." },
-            { status: 500 }
-        );
+        return serverError("Security password reset", err);
     }
 }
