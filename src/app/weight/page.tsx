@@ -664,28 +664,28 @@ export default function WeightTrackerPage() {
                         </div>
 
                         <div className={styles.historyHeaderActions}>
-                            <div className={styles.activeSortText}>
+                            <div className={global.activeSortText}>
                                 {historySort === "newest" && "Newest to Oldest"}
                                 {historySort === "oldest" && "Oldest to Newest"}
                                 {historySort === "highest" && "Highest to Lowest"}
                                 {historySort === "lowest" && "Lowest to Highest"}
                             </div>
 
-                            <div className={styles.sortMenuWrap}>
+                            <div className={global.sortMenuWrap}>
                                 <button
                                     type="button"
-                                    className={styles.sortIconButton}
+                                    className={global.sortIconButton}
                                     onClick={() => setSortMenuOpen((current) => !current)}
                                     title="Sort history"
                                 >
-                                    <ArrowDownWideNarrow size={22} />
+                                    <ArrowDownWideNarrow size={14} />
                                 </button>
 
                                 {sortMenuOpen && (
-                                    <div className={styles.sortDropdown}>
+                                    <div className={global.sortDropdown}>
                                         <button
                                             type="button"
-                                            className={historySort === "newest" ? styles.sortOptionActive : styles.sortOption}
+                                            className={historySort === "newest" ? global.sortOptionActive : global.sortOption}
                                             onClick={() => {
                                                 setHistorySort("newest");
                                                 setHistoryPage(1);
@@ -697,7 +697,7 @@ export default function WeightTrackerPage() {
 
                                         <button
                                             type="button"
-                                            className={historySort === "oldest" ? styles.sortOptionActive : styles.sortOption}
+                                            className={historySort === "oldest" ? global.sortOptionActive : global.sortOption}
                                             onClick={() => {
                                                 setHistorySort("oldest");
                                                 setHistoryPage(1);
@@ -709,7 +709,7 @@ export default function WeightTrackerPage() {
 
                                         <button
                                             type="button"
-                                            className={historySort === "highest" ? styles.sortOptionActive : styles.sortOption}
+                                            className={historySort === "highest" ? global.sortOptionActive : global.sortOption}
                                             onClick={() => {
                                                 setHistorySort("highest");
                                                 setHistoryPage(1);
@@ -721,7 +721,7 @@ export default function WeightTrackerPage() {
 
                                         <button
                                             type="button"
-                                            className={historySort === "lowest" ? styles.sortOptionActive : styles.sortOption}
+                                            className={historySort === "lowest" ? global.sortOptionActive : global.sortOption}
                                             onClick={() => {
                                                 setHistorySort("lowest");
                                                 setHistoryPage(1);

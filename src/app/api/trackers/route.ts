@@ -11,6 +11,7 @@ export const GET = withUser(async (req, _context, user) => {
         const search = searchParams.get("search")?.trim() || "";
         const status = searchParams.get("status")?.trim() || "";
         const tag = searchParams.get("tag")?.trim() || "";
+        const sort = searchParams.get("sort")?.trim() || "newest";
 
         if (slug) {
             const trackerResult = await db.query(
@@ -83,6 +84,18 @@ export const GET = withUser(async (req, _context, user) => {
                 itemConditions.push(`tags @> $${tagParamIndex}::jsonb`);
             }
 
+            let orderBy = "created_at DESC";
+
+            if (sort === "title_asc") {
+                orderBy = "LOWER(title) ASC, created_at DESC";
+            } else if (sort === "title_desc") {
+                orderBy = "LOWER(title) DESC, created_at DESC";
+            }
+
+            if (sort === "oldest") {
+                orderBy = "created_at ASC";
+            }
+            
             const items = await db.query(
                 `
                     SELECT
@@ -102,9 +115,7 @@ export const GET = withUser(async (req, _context, user) => {
                         updated_at
                     FROM simple_tracker_items
                     WHERE ${itemConditions.join(" AND ")}
-                    ORDER BY
-                        sort_order ASC NULLS LAST,
-                        updated_at DESC
+                    ORDER BY ${orderBy}
                 `,
                 itemParams
             );

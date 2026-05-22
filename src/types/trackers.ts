@@ -80,10 +80,12 @@ export type TrackerFilters = {
     search: string;
     status: string;
     tag: string;
+    sort: "title_asc" | "title_desc" | "newest" | "oldest";
 };
 
 export const defaultFilters: TrackerFilters = {
     search: "",
     status: "",
     tag: "",
+    sort: "newest",
 };
