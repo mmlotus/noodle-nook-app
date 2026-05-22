@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import global from "@/styles/Global.module.css";
 import toast from "react-hot-toast";
-import { ExpenseForExports, MileageEntryForLog } from "@/types";
+import { ExpenseForExports, MileageEntryForLog } from "@/types/mileage";
 
 type ExportKind = "expenses" | "mileage";
 

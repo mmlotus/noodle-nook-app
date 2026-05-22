@@ -1,5 +1,5 @@
 import { toNumber } from "@/app/utils/parse";
-import { CalculatedReimbursement, CalculateReimbursementInput } from "@/types";
+import { CalculatedReimbursement, CalculateReimbursementInput } from "@/types/mileage";
 
 function roundCurrency(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100;

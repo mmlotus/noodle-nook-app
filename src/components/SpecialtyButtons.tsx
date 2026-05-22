@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import global from "@/styles/Global.module.css";
-import { Kind } from "@/types";
+import { Kind } from "@/types/basics";
 
 {/* FILTER BUTTONS */ }
 type FiltersBase = Record<string, Kind>;

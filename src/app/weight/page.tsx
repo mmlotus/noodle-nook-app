@@ -9,7 +9,7 @@ import { formatDate, getTodayDateString } from "../utils/formatDate";
 import { fromPounds, toPounds, WeightUnit, weightUnitOptions } from "@/lib/weight/weightUtils";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Banner from "@/components/Images/banner";
-import { ChartRange, UserRow } from "@/types";
+import { ChartRange, UserRow } from "@/types/basics";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import Pagination from "@/components/Pagination";
 import { ArrowDownWideNarrow, Pencil, Trash } from "lucide-react";

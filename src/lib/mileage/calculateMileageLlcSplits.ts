@@ -1,4 +1,4 @@
-import { CalculateMileageLlcSplitsInput, CalculateMileageLlcSplitsResult } from "@/types";
+import { CalculateMileageLlcSplitsInput, CalculateMileageLlcSplitsResult } from "@/types/mileage";
 
 
 function splitNumEvenly(total: number, parts: number): number[] {

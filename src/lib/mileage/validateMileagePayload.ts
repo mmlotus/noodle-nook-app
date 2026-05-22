@@ -1,5 +1,5 @@
 import { cleanText } from "@/app/utils/parse";
-import { MILEAGE_LLCS, MileageCreatePayload, MileageLlc, ValidatedMileagePayload } from "@/types";
+import { MILEAGE_LLCS, MileageCreatePayload, MileageLlc, ValidatedMileagePayload } from "@/types/mileage";
 
 function isMileageLlc(value: unknown): value is MileageLlc {
     return (

@@ -1,5 +1,5 @@
 import { toNumber } from "@/app/utils/parse";
-import { CalculatedMileageValues, MileageCreatePayload } from "@/types";
+import { CalculatedMileageValues, MileageCreatePayload } from "@/types/mileage";
 
 
 export function calculateMileageValues(
