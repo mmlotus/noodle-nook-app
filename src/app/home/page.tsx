@@ -30,6 +30,8 @@ export default function HomePage() {
                 alt="NoodleNook"
                 width={90}
                 height={90}
+                loading="eager"
+                priority
                 style={{ marginTop: "24px", marginBottom: "2px" }}
             />
 
@@ -54,6 +56,24 @@ export default function HomePage() {
                 <Link href="/habits" className={global.card}>
                     <h2>Habits</h2>
                     <p>Keep up with recurring habits & daily goals.</p>
+                </Link>
+            </div>
+
+            <div className={global.fullWidthSeparator} />
+            <div className={global.subcentered}>My Lists</div>
+
+            <div className={global.grid}>
+                <Link href="/trackers/books" className={global.card}>
+                    <h2>Books</h2>
+                    <p>Track books to buy, read, finish, or revisit.</p>
+                </Link>
+                <Link href="/trackers/watchlist" className={global.card}>
+                    <h2>Watchlist</h2>
+                    <p>Track movies and TV shows you want to watch.</p>
+                </Link>
+                <Link href="/trackers/places" className={global.card}>
+                    <h2>Places to Visit</h2>
+                    <p>Keep track of places you want to go, things to see, & restaurants to eat out at.</p>
                 </Link>
             </div>
 

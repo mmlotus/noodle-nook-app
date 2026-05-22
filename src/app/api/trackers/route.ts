@@ -6,7 +6,11 @@ import { withUser } from "@/lib/api/withUser";
 export const GET = withUser(async (req, _context, user) => {
     try {
         const { searchParams } = new URL(req.url);
+
         const slug = searchParams.get("slug");
+        const search = searchParams.get("search")?.trim() || "";
+        const status = searchParams.get("status")?.trim() || "";
+        const tag = searchParams.get("tag")?.trim() || "";
 
         if (slug) {
             const trackerResult = await db.query(
@@ -40,6 +44,45 @@ export const GET = withUser(async (req, _context, user) => {
 
             const tracker = trackerResult[0];
 
+            const itemConditions = [
+                "tracker_id = $1",
+                "user_id = $2",
+                "is_archived = false",
+            ];
+
+            const itemParams: unknown[] = [tracker.id, user.id];
+
+            if (search) {
+                itemParams.push(`%${search}%`);
+                const searchParamIndex = itemParams.length;
+
+                itemConditions.push(`
+                    (
+                        title ILIKE $${searchParamIndex}    
+                        OR status ILIKE $${searchParamIndex}
+                        OR COALESCE(priority, '') ILIKE $${searchParamIndex}
+                        OR COALESCE(notes, '') ILIKE $${searchParamIndex}
+                        OR COALESCE(url, '') ILIKE $${searchParamIndex}
+                        OR tags::text ILIKE $${searchParamIndex}
+                        OR field_values::text ILIKE $${searchParamIndex}
+                    )
+                `);
+            }
+
+            if (status) {
+                itemParams.push(status);
+                const statusParamIndex = itemParams.length;
+
+                itemConditions.push(`status = $${statusParamIndex}`);
+            }
+
+            if (tag) {
+                itemParams.push(JSON.stringify([tag]));
+                const tagParamIndex = itemParams.length;
+
+                itemConditions.push(`tags @> $${tagParamIndex}::jsonb`);
+            }
+
             const items = await db.query(
                 `
                     SELECT
@@ -58,14 +101,12 @@ export const GET = withUser(async (req, _context, user) => {
                         created_at,
                         updated_at
                     FROM simple_tracker_items
-                    WHERE tracker_id = $1
-                        AND user_id = $2
-                        AND is_archived = false
+                    WHERE ${itemConditions.join(" AND ")}
                     ORDER BY
                         sort_order ASC NULLS LAST,
                         updated_at DESC
                 `,
-                [tracker.id, user.id]
+                itemParams
             );
 
             return jsonOk({ tracker, items });
@@ -168,7 +209,7 @@ export const POST = withUser(async (req, _context, user) => {
                     field_config = EXCLUDED.field_config,
                     tag_options = EXCLUDED.tag_options,
                     is_archived = false,
-                    udpated_at = NOW()
+                    updated_at = NOW()
                 RETURNING
                     id, user_id, name, slug, template_key, tracker_kind,
                     description, status_options, field_config, tag_options,

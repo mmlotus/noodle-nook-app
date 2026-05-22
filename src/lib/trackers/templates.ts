@@ -20,12 +20,17 @@ export const simpleTrackerTemplates: Record<string, SimpleTrackerTemplate> = {
                 key: "format",
                 label: "Format",
                 type: "select",
-                options: ["Paperback/Hardback", "Kindle", "Audibook", "Library", "Other"],
+                options: ["Paperback/Hardback", "Kindle", "Audiobook", "Library", "Other"],
             },
             {
                 key: "series",
                 label: "Series",
                 type: "text",
+            },
+            {
+                key: "seriesNumber",
+                label: "# in Series",
+                type: "number",
             },
         ],
         tags: [

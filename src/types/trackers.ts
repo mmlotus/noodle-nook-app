@@ -6,6 +6,8 @@ export type SimpleTrackerFieldType =
     | "select"
     | "checkbox";
 
+export type SimpleTrackerFieldValue = string | number | boolean | null;
+
 export type SimpleTrackerFieldConfig = {
     key: string;
     label: string;
@@ -55,4 +57,33 @@ export type SimpleTrackerItem = {
     is_archived: boolean;
     created_at: string;
     updated_at: string;
+};
+
+export type SimpleTrackerItemFormState = {
+    title: string;
+    status: string;
+    priority: string;
+    notes: string;
+    url: string;
+    tags: string[];
+    field_values: Record<string, SimpleTrackerFieldValue>;
+};
+
+
+/* COMPONENT PAGE TYPES */
+
+export type SimpleTrackerPageProps = {
+    trackerSlug: string;
+};
+
+export type TrackerFilters = {
+    search: string;
+    status: string;
+    tag: string;
+};
+
+export const defaultFilters: TrackerFilters = {
+    search: "",
+    status: "",
+    tag: "",
 };

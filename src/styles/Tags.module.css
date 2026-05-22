@@ -1,28 +1,42 @@
 .tagSelector {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.tagSelector select {
-  color: var(--text-primary);
-  background-color: var(--bg);
+  gap: 8px;
+  width: 100%;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.tagsSingle {
+  min-height: 37px;
+  padding: 6px 10px;
+  flex-wrap: nowrap;
+  align-content: center;
 }
 
 .tag {
-  background: var(--text-primary);
-  color: var(--bg);
-  padding: 4px 8px;
-  border-radius: 12px;
+  background: var(--brand);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 0.85rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .removeBtn {
@@ -30,6 +44,85 @@
   border: none;
   margin-left: 4px;
   cursor: pointer;
-  color: var(--btn-hover);
+  color: white;
   font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.removeBtn:hover {
+  color: var(--brand-lt);
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  flex: 1 1 180px;
+  min-width: 180px;
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.tagInputSingle {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tagInput::placeholder {
+  color: var(--text-muted);
+}
+
+.suggestions {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+}
+
+.suggestionButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.suggestionButton:hover {
+  background: var(--bg-alt);
+}
+
+.suggestionButtonActive {
+  background: var(--bg-alt);
+}
+
+.suggestionTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.createTagLabel {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }

@@ -1,0 +1,253 @@
+.trackerPage {
+    width: 100%;
+    padding: 32px 20px 64px;
+}
+
+.section {
+    width: min(1180px, 100%);
+    margin: 0 auto 28px;
+    padding: 28px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sectionHeader {
+    margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+}
+
+.sectionHeader p,
+.listHeader p {
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    color: var(--text);
+}
+
+.checkboxRow input {
+    width: auto;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.listHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 1fr minmax(220px, 340px);
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.statusFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filterButton,
+.filterActive {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.filterButton {
+    background: var(--bg-alt);
+    color: var(--text);
+}
+
+.filterButton:hover {
+    background: var(--bg);
+    border-color: var(--text-muted);
+    transform: translateY(-1px);
+}
+
+.filterActive {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+    font-weight: 700;
+}
+
+.itemGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.itemCard {
+    background: var(--bg-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 18px;
+    color: var(--text);
+}
+
+.itemCardHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.itemCardHeader h3 {
+    margin-top: 8px;
+    font-size: 1.2rem;
+    color: var(--text);
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.statusPill {
+    display: inline-flex;
+    width: fit-content;
+    border-radius: 999px;
+    padding: 4px 9px;
+    background: var(--brand);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.metaLine {
+    color: var(--text);
+    margin: 7px 0;
+    line-height: 1.4;
+}
+
+.metaLine strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.metaLine a {
+    color: var(--brand);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.tagRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.tagPill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 9px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.notes {
+    margin-top: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+@media (max-width: 900px) {
+    .formGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .trackerPage {
+        padding: 20px 12px 48px;
+    }
+
+    .section {
+        padding: 18px;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        justify-content: stretch;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+
+    .itemGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .itemCardHeader {
+        flex-direction: column;
+    }
+
+    .cardActions {
+        align-self: flex-end;
+    }
+}

@@ -198,6 +198,8 @@ function LoginContent() {
                         alt="NoodleNook"
                         width={90}
                         height={90}
+                        loading="eager"
+                        priority
                     />
 
                     <h1 className={global.heading} style={{ marginBottom: "6px" }}>NoodleNook</h1>
