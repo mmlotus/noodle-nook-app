@@ -9,11 +9,20 @@ import ToolTips from "@/components/ToolTips/ToolTips";
 import { useToolTips } from "@/components/ToolTips/ToolTipProvider";
 import { useCurrentUser } from "@/lib/useCurrentUser";
 import Link from "next/link";
+import { disablePushNotifications, enablePushNotifications, getPushDeviceStatus, PushDeviceStatus } from "@/lib/push/pushNotifications";
 
 export default function ProfileMain() {
     const { user, isAuthenticated, isLoading, update } = useCurrentUser();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const [pushEnabled, setPushEnabled] = useState(true);
+    const [pushLoading, setPushLoading] = useState(false);
+    const [pushDeviceStatus, setPushDeviceStatus] = useState<PushDeviceStatus>({
+        supported: false,
+        permission: "default",
+        subscribed: false,
+    });
 
     const [name, setName] = useState("");
     const [subtitleChoice, setSubtitleChoice] = useState("");
@@ -26,6 +35,15 @@ export default function ProfileMain() {
 
     const { tooltipsEnabled, setTooltipsEnabled } = useToolTips();
 
+    const refreshPushDeviceStatus = async () => {
+        try {
+            const status = await getPushDeviceStatus();
+            setPushDeviceStatus(status);
+        } catch (err) {
+            console.error("Error checking push device status", err);
+        }
+    };
+
     // Load user profile from backend
     useEffect(() => {
         async function fetchProfile() {
@@ -36,6 +54,9 @@ export default function ProfileMain() {
                 setName(data.name);
                 setSubtitleChoice(data.subtitle_choice || "");
                 setThemePref(data.theme_preference || "system");
+                setPushEnabled(data.push_notifications_enabled ?? true);
+
+                await refreshPushDeviceStatus();
 
                 setOrigName(data.name);
                 setOrigSubtitleChoice(data.subtitle_choice || "");
@@ -88,8 +109,38 @@ export default function ProfileMain() {
         setIsEditing(false);
     };
 
+    const handlePushToggle = async (checked: boolean) => {
+        setPushLoading(true);
+
+        try {
+            if (checked) {
+                await enablePushNotifications();
+                setPushEnabled(true);
+                toast.success("Push notifications enabled on this device!");
+            } else {
+                await disablePushNotifications();
+                setPushEnabled(false);
+                toast.success("Push notifications disabled.");
+            }
+
+            await refreshPushDeviceStatus();
+        } catch (err) {
+            console.error("Error updating push notifications", err);
+
+            await refreshPushDeviceStatus();
+
+            toast.error(
+                err instanceof Error
+                    ? err.message
+                    : "Failed to update push notifications."
+            );
+        } finally {
+            setPushLoading(false);
+        }
+    };
+
     const firstName = name.trim().split(" ")[0] || "";
-    
+
     return (
         <div className={global.landing}>
             <Banner
@@ -181,6 +232,35 @@ export default function ProfileMain() {
                                 }
                             }}
                         />
+                    </div>
+
+                    <div className={global.inputGroup}>
+                        <label className={global.label}>Push Notifications?</label>
+                        <input
+                            type="checkbox"
+                            checked={pushEnabled}
+                            disabled={pushLoading}
+                            onChange={(e) => handlePushToggle(e.target.checked)}
+                        />
+
+                        {pushEnabled && !pushDeviceStatus.subscribed && (
+                            <p className={global.smallText}>
+                                Notifications are enabled in NoodleNook, but this device still needs permission.
+                                Tap the checkbox off and back on to allow notifications on this device.
+                            </p>
+                        )}
+
+                        {pushEnabled && pushDeviceStatus.permission === "denied" && (
+                            <p className={global.smallText}>
+                                Notifications are blocked on this device. Turn them back on in your phone/browser settings.
+                            </p>
+                        )}
+
+                        {pushEnabled && pushDeviceStatus.subscribed && (
+                            <p className={global.smallText}>
+                                This device is subscribed to push notifications.
+                            </p>
+                        )}
                     </div>
 
                     <div className={global.inputGroup}>

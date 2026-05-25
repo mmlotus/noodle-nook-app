@@ -1,5 +1,6 @@
 import { toNumber } from "@/app/utils/parse";
 import { CalculatedReimbursement, CalculateReimbursementInput } from "@/types/mileage";
+import { getFederalMileageRateForDate } from "./mileageRates";
 
 function roundCurrency(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100;
@@ -8,15 +9,10 @@ function roundCurrency(value: number): number {
 export function calculateReimbursement({
     totalMiles,
     reimbursementRate,
+    startDate,
 }: CalculateReimbursementInput): CalculatedReimbursement {
-    const rate = toNumber(reimbursementRate);
-
-    if (rate === null) {
-        return {
-            reimbursementRate: null,
-            reimbursementTotal: null,
-        };
-    }
+    const providedRate = toNumber(reimbursementRate);
+    const rate = providedRate ?? getFederalMileageRateForDate(startDate);
 
     if (rate < 0) {
         throw new Error("Reimbursement rate cannot be negative.");

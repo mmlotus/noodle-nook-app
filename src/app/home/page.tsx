@@ -46,14 +46,17 @@ export default function HomePage() {
                     <p>Log your weight & view progress over time.</p>
                 </Link>
                 <Link href="/meals" className={global.card}>
+                    <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Meals</h2>
                     <p>Track meals, food patterns & routines.</p>
                 </Link>
                 <Link href="/mood" className={global.card}>
+                    <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Mood</h2>
                     <p>Check in with how you are feeling each day.</p>
                 </Link>
                 <Link href="/habits" className={global.card}>
+                    <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Habits</h2>
                     <p>Keep up with recurring habits & daily goals.</p>
                 </Link>

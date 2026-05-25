@@ -14,7 +14,8 @@ export const GET = withUser(async (_req, _context, user) => {
                 name,
                 subtitle_choice,
                 theme_preference,
-                preferred_weight_unit
+                preferred_weight_unit,
+                push_notifications_enabled
             FROM users
             WHERE id = $1
             `,
@@ -33,7 +34,7 @@ export const GET = withUser(async (_req, _context, user) => {
 
 export const POST = withUser(async (req, _context, user) => {
     try {
-        const { name, subtitle_choice, theme_preference, preferred_weight_unit } = await req.json();
+        const { name, subtitle_choice, theme_preference, preferred_weight_unit, push_notifications_enabled } = await req.json();
 
         if (!name || typeof name !== "string") {
             return jsonError("Invalid name", 400);
@@ -57,17 +58,19 @@ export const POST = withUser(async (req, _context, user) => {
                     subtitle_choice = $2,
                     theme_preference = $3,
                     preferred_weight_unit = $4,
+                    push_notifications_enabled = $5,
                     updated_at = NOW()
-                WHERE id = $5
+                WHERE id = $6
                 RETURNING
-                    id, email, name, subtitle_choice,
-                    theme_preference, preferred_weight_unit
+                    id, email, name, subtitle_choice, theme_preference,
+                    preferred_weight_unit, push_notifications_enabled
             `,
             [
                 name.trim(),
                 subtitle_choice || "",
                 theme_preference || "system",
                 preferred_weight_unit || "lb",
+                push_notifications_enabled,
                 user.id,
             ]
         );
