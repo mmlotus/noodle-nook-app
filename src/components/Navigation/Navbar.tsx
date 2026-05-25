@@ -68,7 +68,7 @@ export default function Navbar() {
             <div className={navStyles.left}>
                 <div className={navStyles.brand}>
                     <Image src="/icons/NoodleNook-20x20.svg" alt="" width={20} height={20} className={navStyles.logo} />
-                    <div className={`${navStyles.title} ${quicksand.className}`}>NoodleNook</div>
+                    <Link href="/home" className={`${navStyles.title} ${quicksand.className}`}>NoodleNook</Link>
                 </div>
             </div>
 

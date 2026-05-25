@@ -12,8 +12,16 @@ import Banner from "@/components/Images/banner";
 import { ChartRange, UserRow } from "@/types/basics";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import Pagination from "@/components/Pagination";
-import { ArrowDownWideNarrow, Pencil, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import BasicModal from "@/components/Modals/PopupModal";
+import SortDropdown from "@/components/SortDropdown";
+
+const weightSortOptions: { value: "newest" | "oldest" | "highest" | "lowest"; label: string }[] = [
+    { value: "newest", label: "Newest to Oldest" },
+    { value: "oldest", label: "Oldest to Newest" },
+    { value: "highest", label: "Highest Weight to Lowest" },
+    { value: "lowest", label: "Lowest Weight to Highest" },
+];
 
 export default function WeightTrackerPage() {
     const [entries, setEntries] = useState<WeightEntry[]>([]);
@@ -40,7 +48,6 @@ export default function WeightTrackerPage() {
     const [historyPage, setHistoryPage] = useState(1);
     const [historyPerPage, setHistoryPerPage] = useState(10);
     const [historySort, setHistorySort] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
-    const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
     const filteredHistoryEntries = useMemo(() => {
         return entries.filter((entry) => {
@@ -664,75 +671,15 @@ export default function WeightTrackerPage() {
                         </div>
 
                         <div className={styles.historyHeaderActions}>
-                            <div className={global.activeSortText}>
-                                {historySort === "newest" && "Newest to Oldest"}
-                                {historySort === "oldest" && "Oldest to Newest"}
-                                {historySort === "highest" && "Highest to Lowest"}
-                                {historySort === "lowest" && "Lowest to Highest"}
-                            </div>
-
-                            <div className={global.sortMenuWrap}>
-                                <button
-                                    type="button"
-                                    className={global.sortIconButton}
-                                    onClick={() => setSortMenuOpen((current) => !current)}
-                                    title="Sort history"
-                                >
-                                    <ArrowDownWideNarrow size={14} />
-                                </button>
-
-                                {sortMenuOpen && (
-                                    <div className={global.sortDropdown}>
-                                        <button
-                                            type="button"
-                                            className={historySort === "newest" ? global.sortOptionActive : global.sortOption}
-                                            onClick={() => {
-                                                setHistorySort("newest");
-                                                setHistoryPage(1);
-                                                setSortMenuOpen(false);
-                                            }}
-                                        >
-                                            Newest to Oldest
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={historySort === "oldest" ? global.sortOptionActive : global.sortOption}
-                                            onClick={() => {
-                                                setHistorySort("oldest");
-                                                setHistoryPage(1);
-                                                setSortMenuOpen(false);
-                                            }}
-                                        >
-                                            Oldest to Newest
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={historySort === "highest" ? global.sortOptionActive : global.sortOption}
-                                            onClick={() => {
-                                                setHistorySort("highest");
-                                                setHistoryPage(1);
-                                                setSortMenuOpen(false);
-                                            }}
-                                        >
-                                            Highest Weight to Lowest
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={historySort === "lowest" ? global.sortOptionActive : global.sortOption}
-                                            onClick={() => {
-                                                setHistorySort("lowest");
-                                                setHistoryPage(1);
-                                                setSortMenuOpen(false);
-                                            }}
-                                        >
-                                            Lowest Weight to Highest
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            <SortDropdown
+                                value={historySort}
+                                options={weightSortOptions}
+                                onChange={(nextSort) => {
+                                    setHistorySort(nextSort);
+                                    setHistoryPage(1);
+                                }}
+                                title="Sort By"
+                            />
                         </div>
                     </div>
 

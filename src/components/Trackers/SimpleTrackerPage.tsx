@@ -8,9 +8,10 @@ import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../LoadingSpinner";
 import Banner from "../Images/banner";
-import { ArrowDownWideNarrow, Pencil, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import BasicModal from "../Modals/PopupModal";
 import TagSelector from "../TagSelector";
+import SortDropdown from "../SortDropdown";
 
 function buildTrackerQueryParams(
     trackerSlug: string,
@@ -29,6 +30,13 @@ function buildTrackerQueryParams(
     }).toString();
 }
 
+const simpleTrackerSortOptions: { value: TrackerFilters["sort"]; label: string }[] = [
+    { value: "title_asc", label: "A > Z" },
+    { value: "title_desc", label: "Z > A" },
+    { value: "newest", label: "Newly Added > Oldest" },
+    { value: "oldest", label: "Oldest > Newly Added" },
+];
+
 export default function SimpleTrackerPage({ trackerSlug }: SimpleTrackerPageProps) {
     const [tracker, setTracker] = useState<SimpleTracker | null>(null);
     const [items, setItems] = useState<SimpleTrackerItem[]>([]);
@@ -38,29 +46,11 @@ export default function SimpleTrackerPage({ trackerSlug }: SimpleTrackerPageProp
     const [pendingDeleteItem, setPendingDeleteItem] = useState<SimpleTrackerItem | null>(null);
 
     const [filters, setFilters] = useState<TrackerFilters>(defaultFilters);
-    const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
     const [loading, setLoading] = useState(true);
+    const [, setListLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
-    function getSortLabel(sort: TrackerFilters["sort"]) {
-        if (sort === "title_asc") return "A > Z";
-        if (sort === "title_desc") return "Z > A";
-        if (sort === "oldest") return "Oldest to Newest";
-        return "Newest to Oldest";
-    }
-
-    async function handleSortChange(nextSort: TrackerFilters["sort"]) {
-        const nextFilters = {
-            ...filters,
-            sort: nextSort,
-        };
-
-        setFilters(nextFilters);
-        setSortMenuOpen(false);
-        await handleSearch(nextFilters);
-    }
 
     const fetchTracker = useCallback(
         async (currentFilters: TrackerFilters) => {
@@ -134,7 +124,7 @@ export default function SimpleTrackerPage({ trackerSlug }: SimpleTrackerPageProp
 
     async function handleSearch(currentFilters: TrackerFilters = filters) {
         try {
-            setLoading(true);
+            setListLoading(true);
 
             const data = await fetchTracker(currentFilters);
 
@@ -144,7 +134,7 @@ export default function SimpleTrackerPage({ trackerSlug }: SimpleTrackerPageProp
             console.error("handleSearch tracker error:", err);
             toast.error("Could not search/filter tracker.");
         } finally {
-            setLoading(false);
+            setListLoading(false);
         }
     }
 
@@ -449,72 +439,20 @@ export default function SimpleTrackerPage({ trackerSlug }: SimpleTrackerPageProp
                         </div>
 
                         <div className={styles.listHeaderActions}>
-                            <div className={global.activeSortText}>
-                                {getSortLabel(filters.sort)}
-                            </div>
+                            <SortDropdown
+                                value={filters.sort}
+                                options={simpleTrackerSortOptions}
+                                onChange={(nextSort) => {
+                                    const nextFilters = {
+                                        ...filters,
+                                        sort: nextSort,
+                                    };
 
-                            <div className={global.sortMenuWrap}>
-                                <button
-                                    type="button"
-                                    className={global.sortIconButton}
-                                    onClick={() => setSortMenuOpen((current) => !current)}
-                                    title="Sort items"
-                                >
-                                    <ArrowDownWideNarrow size={14} />
-                                </button>
-
-                                {sortMenuOpen && (
-                                    <div className={global.sortDropdown}>
-                                        <button
-                                            type="button"
-                                            className={
-                                                filters.sort === "title_asc"
-                                                    ? global.sortOptionActive
-                                                    : global.sortOption
-                                            }
-                                            onClick={() => handleSortChange("title_asc")}
-                                        >
-                                            A &gt; Z
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                filters.sort === "title_desc"
-                                                    ? global.sortOptionActive
-                                                    : global.sortOption
-                                            }
-                                            onClick={() => handleSortChange("title_desc")}
-                                        >
-                                            Z &gt; A
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                filters.sort === "newest"
-                                                    ? global.sortOptionActive
-                                                    : global.sortOption
-                                            }
-                                            onClick={() => handleSortChange("newest")}
-                                        >
-                                            Newly Added First
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                filters.sort === "oldest"
-                                                    ? global.sortOptionActive
-                                                    : global.sortOption
-                                            }
-                                            onClick={() => handleSortChange("oldest")}
-                                        >
-                                            Newly Added Last
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                    setFilters(nextFilters);
+                                    void handleSearch(nextFilters);
+                                }}
+                                title="Sort By"
+                            />
                         </div>
                     </div>
 

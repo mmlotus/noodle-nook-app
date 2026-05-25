@@ -22,8 +22,12 @@ export type NotesApiResponse = {
     notes: Note[];
 };
 
+export type NoteApiResponse = {
+    note: Note;
+};
+
 export type NotesPageState = {
-    note: Note[];
+    notes: Note[];
     selectedNoteId: string | null;
     searchTerm: string;
     sortBy: NoteSortOption;

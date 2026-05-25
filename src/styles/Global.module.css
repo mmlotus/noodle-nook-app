@@ -104,75 +104,75 @@
 
 /* SORT FORMATS */
 .sortMenuWrap {
-    position: relative;
-    display: inline-flex;
+  position: relative;
+  display: inline-flex;
 }
 
 .sortIconButton {
-    background: var(--bg);
-    border: 1px solid var(--border-light);
-    color: var(--text);
-    border-radius: 999px;
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sortIconButton:hover {
-    background: var(--bg-alt);
-    border-color: var(--brand);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
+  background: var(--bg-alt);
+  border-color: var(--brand);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 .sortDropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 250px;
-    background: var(--bg);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-    padding: 8px;
-    z-index: 20;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 8px;
+  z-index: 20;
 }
 
 .sortOption,
 .sortOptionActive {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    text-align: left;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font: inherit;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
 }
 
 .sortOption:hover {
-    background: var(--bg-alt);
+  background: var(--bg-alt);
 }
 
 .sortOptionActive {
-    background: var(--brand);
-    color: var(--bg);
-    font-weight: 600;
+  background: var(--brand);
+  color: var(--bg);
+  font-weight: 600;
 }
 
 .activeSortText {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* SEPARATORS */
@@ -966,4 +966,10 @@
   .passwordMismatch {
     grid-column: 1;
   }
+
+  .sortDropdown {
+    right: 0;
+    width: min(250px, 80vw);
+  }
+
 }

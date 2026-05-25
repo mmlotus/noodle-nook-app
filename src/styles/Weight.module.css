@@ -175,6 +175,8 @@
     display: flex;
     gap: 10px;
     align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .preferenceRow {
@@ -249,16 +251,19 @@
     }
 
     .historyItem {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
     }
 
     .historyDetails {
         grid-template-columns: 1fr;
+        min-width: 0;
     }
 
     .historyActions {
-        justify-content: flex-start;
-        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: flex-start;
+        flex-wrap: nowrap;
     }
 }
 

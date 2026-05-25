@@ -1,0 +1,217 @@
+.notesPage {
+    width: 100%;
+    padding: 32px 20px 64px;
+}
+
+.section {
+    width: min(1180px, 100%);
+    margin: 0 auto 28px;
+    padding: 28px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sectionHeader {
+    margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+}
+
+.sectionHeader p {
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.editorGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bodyField textarea {
+    min-height: 260px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.notesHeaderRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.notesHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.notesFilters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+
+.filterField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filterActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-bottom: 10px;
+}
+
+.notesList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.noteItem {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.noteItemActive {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 1px var(--brand);
+}
+
+.noteDetails {
+    display: grid;
+    grid-template-columns: 220px 1fr 140px;
+    gap: 14px;
+    align-items: start;
+}
+
+.noteLabel {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.noteTitle,
+.noteValue {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.notePreview {
+    display: block;
+    color: var(--text);
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.noteActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.noteMetaBlock {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-right: auto;
+}
+
+.noteTimestamp {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+@media (max-width: 900px) {
+    .noteItem {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+    }
+
+    .noteDetails {
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
+
+    .noteActions {
+        justify-content: flex-end;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+}
+
+@media (max-width: 700px) {
+    .notesHeaderRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .notesHeaderActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .notesFilters {
+        grid-template-columns: 1fr;
+    }
+
+    .filterActions {
+        padding-bottom: 0;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .notesPage {
+        padding: 20px 12px 48px;
+    }
+
+    .section {
+        padding: 18px;
+    }
+
+    .actions {
+        justify-content: stretch;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

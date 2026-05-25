@@ -75,6 +75,10 @@ export default function HomePage() {
                     <h2>Places to Visit</h2>
                     <p>Keep track of places you want to go, things to see, & restaurants to eat out at.</p>
                 </Link>
+                <Link href="/notes" className={global.card}>
+                    <h2>Notes</h2>
+                    <p>Jot down quick ideas or long-term goals in a standard notepad format.</p>
+                </Link>
             </div>
 
             <div className={global.fullWidthSeparator} />
