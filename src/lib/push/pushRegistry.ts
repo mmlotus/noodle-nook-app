@@ -3,7 +3,7 @@ export type PushEntry = {
     title: string;
     body: string;
     url: string;
-    active: boolean;
+    active: boolean; // Only send if true
 };
 
 export type PushRegistry = {
@@ -13,9 +13,9 @@ export type PushRegistry = {
 export const pushRegistry: PushRegistry = {
     system: [
         {
-            id: "launch-test-001",
+            id: "welcome",
             title: "NoodleNook",
-            body: "This is the push notification text I want to send.",
+            body: "This is your first push notification message.",
             url: "/home",
             active: true,
         },

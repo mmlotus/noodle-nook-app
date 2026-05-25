@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import db from "@/lib/db";
+import { PushEntry } from "@/lib/push/pushRegistry";
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
@@ -11,18 +12,12 @@ if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) {
 
 webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
-type PushPayload = {
-    title: string;
-    body: string;
-    url: string;
-};
-
-export async function sendPushToAllUsers(payload: PushPayload) {
+export async function sendPushToAllUsers(payload: PushEntry) {
     const subscriptions = await db.query(
         `
-            SELECT id, subscription
-            FROM push_subscriptions
-        `
+        SELECT id, subscription
+        FROM push_subscriptions
+    `
     );
 
     await Promise.all(
@@ -30,11 +25,14 @@ export async function sendPushToAllUsers(payload: PushPayload) {
             try {
                 await webpush.sendNotification(
                     row.subscription,
-                    JSON.stringify(payload)
+                    JSON.stringify({
+                        title: payload.title,
+                        body: payload.body,
+                        url: payload.url || "/home",
+                    })
                 );
             } catch (err: unknown) {
                 console.error("Push send error:", err);
-
                 const statusCode =
                     typeof err === "object" && err !== null && "statusCode" in err
                         ? (err as { statusCode?: number }).statusCode
@@ -42,10 +40,7 @@ export async function sendPushToAllUsers(payload: PushPayload) {
 
                 if (statusCode === 404 || statusCode === 410) {
                     await db.query(
-                        `
-                            DELETE FROM push_subscriptions
-                            WHERE id = $1
-                        `,
+                        `DELETE FROM push_subscriptions WHERE id = $1`,
                         [row.id]
                     );
                 }
