@@ -1,0 +1,19 @@
+name: Send Push After Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  send-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for Vercel deployment
+        run: sleep 120
+
+      - name: Send unsent push notifications
+        run: |
+          curl -f -X GET "https://noodlenook.vercel.app/api/push/cron" \
+            -H "Authorization: Bearer ${{ secrets.PUSH_SEND_SECRET }}"

@@ -15,7 +15,7 @@ export const pushRegistry: PushRegistry = {
         {
             id: "welcome",
             title: "NoodleNook",
-            body: "This is your first push notification message.",
+            body: "This is a test push notification.",
             url: "/home",
             active: true,
         },
