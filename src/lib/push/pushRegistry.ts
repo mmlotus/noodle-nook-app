@@ -19,6 +19,13 @@ export const pushRegistry: PushRegistry = {
             url: "/home",
             active: true,
         },
+        {
+            id: "noodle",
+            title: "NoodleNook Push Test",
+            body: "This is a test push notification that should open the Books Tracker.",
+            url: "/trackers/books",
+            active: true,
+        },
     ],
 };
 
