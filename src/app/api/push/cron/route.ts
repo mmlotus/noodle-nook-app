@@ -7,11 +7,32 @@ import { sendPushToAllUsers } from "@/lib/push/sendPushNotification";
 
 export async function GET(req: Request) {
     try {
-        const authHeader = req.headers.get("authorization");
-        const expectedHeader = `Bearer ${process.env.PUSH_SEND_SECRET}`;
+        const providedSecret = req.headers.get("x-push-send-secret");
+        const expectedSecret = process.env.PUSH_SEND_SECRET;
 
-        if (!process.env.PUSH_SEND_SECRET || authHeader !== expectedHeader) {
-            return new Response("Unauthorized", { status: 401 });
+        if (!expectedSecret) {
+            return Response.json(
+                { error: "PUSH_SEND_SECRET is missing on the server." },
+                { status: 500 }
+            );
+        }
+
+        if (!providedSecret) {
+            return Response.json(
+                { error: "Missing x-push-send-secret header." },
+                { status: 401 }
+            );
+        }
+
+        if (providedSecret !== expectedSecret) {
+            return Response.json(
+                {
+                    error: "Invalid push send secret.",
+                    providedLength: providedSecret.length,
+                    expectedLength: expectedSecret.length,
+                },
+                { status: 401 }
+            );
         }
 
         const activeEntries = getActivePushEntries();

@@ -15,5 +15,5 @@ jobs:
 
       - name: Send unsent push notifications
         run: |
-          curl -f -X GET "https://noodlenook.vercel.app/api/push/cron" \
-            -H "Authorization: Bearer ${{ secrets.PUSH_SEND_SECRET }}"
+          curl -i -f -X GET "https://noodlenook.vercel.app/api/push/cron" \
+            -H "x-push-send-secret: ${{ secrets.PUSH_SEND_SECRET }}"
