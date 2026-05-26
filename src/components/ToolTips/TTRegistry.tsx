@@ -23,6 +23,12 @@ export const tooltipRegistry: TooltipRegistry = {
             message1: "Want to see more on here? Is there a new tooltip type that could help others?",
             message2: "Email mmccoyinfo@gmail.com!"
         },
+        {
+            id: "push",
+            title: "Have you subscribed to push notifications? 🥳",
+            message1: "Push notifications can be turned on in your profile.",
+            message2: "",
+        },
     ],
     profile: [
         {
