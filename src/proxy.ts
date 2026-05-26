@@ -9,6 +9,7 @@ const publicRoutes = [
     "/forgot-password",
     "/privacy",
     "/terms",
+    "/api/push/cron",
 ];
 
 const publicApiRoutes = [
