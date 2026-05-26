@@ -14,6 +14,15 @@ jobs:
         run: sleep 120
 
       - name: Send unsent push notifications
+        env:
+          PUSH_SEND_SECRET: ${{ secrets.PUSH_SEND_SECRET }}
         run: |
-          curl -i -f -X GET "https://noodlenook.vercel.app/api/push/cron" \
-            -H "x-push-send-secret: ${{ secrets.PUSH_SEND_SECRET }}"
+          if [ -z "$PUSH_SEND_SECRET" ]; then
+            echo "PUSH_SEND_SECRET is missing from GitHub Actions secrets"
+            exit 1
+          fi
+
+          echo "Secret length: ${#PUSH_SEND_SECRET}"
+
+          curl -i -X GET "https://noodlenook.vercel.app/api/push/cron" \
+            -H "x-push-send-secret: $PUSH_SEND_SECRET"
