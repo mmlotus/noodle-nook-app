@@ -8,6 +8,7 @@ type ToolTipContextType = {
     dismissed: string[];
     dismiss: (id: string) => void;
     tooltipsEnabled: boolean;
+    tooltipsReady: boolean;
     setTooltipsEnabled: (val: boolean) => void;
     resetAllTooltips: () => void;
 };
@@ -15,28 +16,62 @@ type ToolTipContextType = {
 const ToolTipContext = createContext<ToolTipContextType>({
     dismissed: [],
     dismiss: () => { },
-    tooltipsEnabled: true,
+    tooltipsEnabled: false,
+    tooltipsReady: false,
     setTooltipsEnabled: () => { },
     resetAllTooltips: () => { },
 });
 
 export function ToolTipProvider({ children }: { children: React.ReactNode }) {
     const [dismissed, setDismissed] = useState<string[]>([]);
-    const [tooltipsEnabled, setTooltipsEnabledState] = useState(true);
+    const [tooltipsEnabled, setTooltipsEnabledState] = useState(false);
+    const [tooltipsReady, setTooltipsReady] = useState(false);
     const { isAuthenticated } = useCurrentUser();
 
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        const fetchTooltips = async () => {
-            const res = await fetch("/api/user-tooltips");
-            if (!res.ok) return console.error("Failed to load tooltips");
+        let cancelled = false;
 
-            const data = await res.json();
-            setDismissed(data.dismissed || []);
-            setTooltipsEnabledState(data.tooltipsEnabled ?? true);
+        const fetchTooltips = async () => {
+            try {
+                const res = await fetch("/api/user-tooltips");
+
+                if (!res.ok) {
+                    console.error("Failed to load tooltips");
+
+                    if (!cancelled) {
+                        setDismissed([]);
+                        setTooltipsEnabledState(false);
+                        setTooltipsReady(true);
+                    }
+
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (cancelled) return;
+
+                setDismissed(Array.isArray(data.dismissed) ? data.dismissed : []);
+                setTooltipsEnabledState(data.tooltipsEnabled === true);
+                setTooltipsReady(true);
+            } catch (err) {
+                console.error("Failed to load tooltips:", err);
+
+                if (!cancelled) {
+                    setDismissed([]);
+                    setTooltipsEnabledState(false);
+                    setTooltipsReady(true);
+                }
+            }
         };
+
         fetchTooltips();
+
+        return () => {
+            cancelled = true;
+        };
     }, [isAuthenticated]);
 
     const updateDB = (changes: Partial<{ tooltipsEnabled: boolean; dismissed: string[] }>) => {
@@ -47,54 +82,58 @@ export function ToolTipProvider({ children }: { children: React.ReactNode }) {
         }).catch((err) => console.error("Tooltip DB update failed:", err));
     };
 
-    // Dismiss individual tooltip
     const dismiss = (id: string) => {
         if (dismissed.includes(id)) return;
 
-        setTimeout(() => {
-            setDismissed((prev) => {
-                if (prev.includes(id)) return prev;
-                const updated = [...prev, id];
+        setDismissed((prev) => {
+            if (prev.includes(id)) return prev;
 
-                updateDB({ dismissed: updated });
+            const updated = [...prev, id];
 
-                // Check if all tooltips are now dismissed
-                const allTipIds = Object.values(tooltipRegistry)
-                    .flat()
-                    .map((tip) => tip.id);
-                const allDismissed = allTipIds.every((tipId) => updated.includes(tipId));
+            updateDB({ dismissed: updated });
 
-                if (allDismissed) {
-                    setTooltipsEnabledState(false);
-                    updateDB({ tooltipsEnabled: false });
-                }
+            const allTipIds = Object.values(tooltipRegistry)
+                .flat()
+                .map((tip) => tip.id);
 
-                return updated;
-            })
-        }, 1000);
+            const allDismissed = allTipIds.every((tipId) => updated.includes(tipId));
+
+            if (allDismissed) {
+                setTooltipsEnabledState(false);
+                updateDB({ tooltipsEnabled: false });
+            }
+
+            return updated;
+        });
     };
 
-    // Manually toggle tips on/off from profile
     const setTooltipsEnabled = (val: boolean) => {
         setTooltipsEnabledState(val);
         updateDB({ tooltipsEnabled: val });
 
-        // Re-enable all tips if toggling ON
         if (val) {
             setDismissed([]);
             updateDB({ dismissed: [] });
         }
     };
 
-    // Proile toggle shortcut
     const resetAllTooltips = () => {
         setDismissed([]);
         setTooltipsEnabledState(true);
         updateDB({ tooltipsEnabled: true, dismissed: [] });
-    }
+    };
 
     return (
-        <ToolTipContext.Provider value={{ dismissed, dismiss, tooltipsEnabled, setTooltipsEnabled, resetAllTooltips }}>
+        <ToolTipContext.Provider
+            value={{
+                dismissed,
+                dismiss,
+                tooltipsEnabled,
+                tooltipsReady,
+                setTooltipsEnabled,
+                resetAllTooltips,
+            }}
+        >
             {children}
         </ToolTipContext.Provider>
     );

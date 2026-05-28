@@ -13,3 +13,8 @@ export function getTodayDateString(): string {
 
     return `${year}-${month}-${day}`;
 }
+
+export function getCurrentMonthValue() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+}

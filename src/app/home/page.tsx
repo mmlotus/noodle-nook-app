@@ -73,6 +73,20 @@ export default function HomePage() {
             </div>
 
             <div className={global.fullWidthSeparator} />
+            <div className={global.subcentered}>My Money</div>
+
+            <div className={global.grid}>
+                <Link href="/budget/recurring" className={global.card}>
+                    <h2>Bills & Income</h2>
+                    <p>Enter your recurring bills and income, as well as expected expenses that may be coming up.</p>
+                </Link>
+                <Link href="/budget" className={global.card}>
+                    <h2>Budget</h2>
+                    <p>Keep tabs on your expected income, expenses, & physical payments.</p>
+                </Link>
+            </div>
+
+            <div className={global.fullWidthSeparator} />
             <div className={global.subcentered}>My Lists</div>
 
             <div className={global.grid}>

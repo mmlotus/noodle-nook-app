@@ -12,6 +12,7 @@ import BasicModal from "@/components/Modals/PopupModal";
 import SortDropdown from "@/components/SortDropdown";
 import { Pencil, Trash } from "lucide-react";
 import Pagination from "@/components/Pagination";
+import { formatCurrency } from "../utils/formatMisc";
 
 const mileageSortOptions: { value: MileageSortOption; label: string }[] = [
     { value: "newest", label: "Newest to Oldest" },
@@ -108,15 +109,6 @@ export default function MileagePage() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         })} mi`;
-    }
-
-    function formatCurrency(value: number | string | null) {
-        const numericValue = Number(value || 0);
-
-        return numericValue.toLocaleString(undefined, {
-            style: "currency",
-            currency: "USD",
-        });
     }
 
     function formatRate(value: number | string | null) {

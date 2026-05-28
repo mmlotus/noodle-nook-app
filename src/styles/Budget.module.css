@@ -1,0 +1,687 @@
+.budgetPage {
+    width: 100%;
+    padding: 32px 20px 64px;
+}
+
+.section {
+    width: min(1180px, 100%);
+    margin: 0 auto 28px;
+    padding: 28px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sectionHeader {
+    margin-bottom: 20px;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+}
+
+.sectionHeader p {
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.sectionHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.sectionHeaderRow h2 {
+    margin: 0;
+}
+
+.sectionHeaderRow p {
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.recurringHeaderActions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.estimateMonthField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.formGrid,
+.modalFormGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: end;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+}
+
+.checkboxRow input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brand);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.recurringGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.groupBlock {
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-alt);
+}
+
+.groupHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.groupHeader h3 {
+    margin: 0;
+    color: var(--brand);
+}
+
+.groupHeader p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.itemList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+}
+
+.itemCard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.itemMain {
+    min-width: 0;
+}
+
+.itemTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.itemTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.inactiveBadge,
+.activeBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.activeBadge {
+    background: rgba(22, 138, 69, 0.12);
+    color: #168a45;
+    border: 1px solid rgba(22, 138, 69, 0.25);
+}
+
+.inactiveBadge {
+    background: rgba(198, 40, 40, 0.1);
+    color: #c62828;
+    border: 1px solid rgba(198, 40, 40, 0.2);
+}
+
+.itemDetails {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detailLabel {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.detailValue {
+    font-weight: 600;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.itemNotes {
+    margin-top: 10px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.itemActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.emptyState {
+    padding: 22px;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+
+.generateMonthBox {
+    padding: 22px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.generateMonthGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.groupTotalBox {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-alt);
+    min-width: 150px;
+}
+
+.groupTotalLabel {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.groupTotalValue {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.summaryCard {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-height: 74px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    background: var(--bg-alt);
+}
+
+.summaryCard strong {
+    font-size: 1.2rem;
+    color: var(--text);
+}
+
+.summaryCardIcon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.inlineSaveRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inlineSaveRow input {
+    min-width: 0;
+    flex: 1;
+}
+
+.calendarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.calendarHeader h2 {
+    margin: 0;
+}
+
+.calendarShell {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 10px;
+    cursor: grab;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    user-select: none;
+}
+
+.calendarShell button,
+.calendarShell input,
+.calendarShell textarea {
+    user-select: auto;
+}
+
+.calendarWeekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(135px, 1fr));
+    gap: 8px;
+    min-width: 980px;
+    margin-bottom: 8px;
+}
+
+.calendarWeekdays span {
+    display: block;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(135px, 1fr));
+    gap: 8px;
+    min-width: 980px;
+}
+
+.calendarDay {
+    min-height: 145px;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    background: var(--bg);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.calendarDayMuted {
+    opacity: 0.42;
+    background: var(--bg-alt);
+}
+
+.calendarDayNumber {
+    font-weight: 800;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.calendarEvents {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.calendarEventPending,
+.calendarEventCompleted,
+.calendarEventSkipped {
+    width: 100%;
+    border-radius: 8px;
+    padding: 7px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    line-height: 1.2;
+}
+
+.calendarEventPending {
+    border: 1px solid var(--brand-lt-txp);
+    background: var(--brand-txp);
+    color: #ffffff;
+}
+
+.calendarEventCompleted {
+    border: 1px solid var(--brand);
+    background: var(--brand);
+    color: #ffffff;
+}
+
+.calendarEventSkipped {
+    border: 1px solid var(--border-light);
+    background: var(--bg-alt);
+    color: var(--text-muted);
+}
+
+.calendarEventPending span,
+.calendarEventCompleted span,
+.calendarEventSkipped span {
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.calendarEventPending strong,
+.calendarEventCompleted strong,
+.calendarEventSkipped strong {
+    font-size: 0.78rem;
+}
+
+.budgetModalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.48);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.budgetModal {
+    width: min(760px, 100%);
+    max-height: calc(100vh - 64px);
+    background: var(--bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.budgetModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.budgetModalHeader h2 {
+    margin: 0;
+    color: var(--text);
+}
+
+.budgetModalHeader p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+}
+
+.budgetModalBody {
+    padding: 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.budgetModalFooter {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-light);
+    background: var(--bg-alt);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.budgetModalActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.statusField {
+    grid-column: 1 / -1;
+}
+
+.statusButtonGroup {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.statusButton {
+    flex: 1 1 150px;
+    min-width: 120px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border-light);
+    background: var(--bg-alt);
+    color: var(--text-muted);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    text-align: center;
+}
+
+.statusButton:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+
+.statusButtonActive {
+    border-color: var(--brand);
+    background: var(--brand);
+    color: #ffffff;
+}
+
+.readOnlyValue {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.calendarDayTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.calendarAddButton {
+    opacity: 0.65;
+    transform: scale(0.85);
+}
+
+.calendarAddButton:hover {
+    opacity: 1;
+}
+
+@media (max-width: 1050px) {
+    .summaryGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 980px) {
+
+    .formGrid,
+    .modalFormGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .itemDetails {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .calendarShell {
+        margin-left: -4px;
+        margin-right: -4px;
+    }
+}
+
+@media (max-width: 700px) {
+    .budgetPage {
+        padding: 20px 12px 48px;
+    }
+
+    .section {
+        padding: 18px;
+    }
+
+    .formGrid,
+    .modalFormGrid,
+    .itemDetails {
+        grid-template-columns: 1fr;
+    }
+
+    .itemCard {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .itemActions {
+        justify-content: flex-start;
+    }
+
+    .actions {
+        justify-content: stretch;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+
+    .groupHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sectionHeaderRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .recurringHeaderActions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .estimateMonthField {
+        width: 100%;
+    }
+
+    .groupTotalBox {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .budgetModalOverlay {
+        padding: 12px;
+    }
+
+    .budgetModal {
+        max-height: calc(100vh - 24px);
+    }
+
+    .budgetModalFooter {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .budgetModalActions {
+        justify-content: stretch;
+    }
+
+    .budgetModalActions button {
+        flex: 1 1 100%;
+    }
+
+    .generateMonthGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .summaryGrid {
+        grid-template-columns: 1fr;
+    }
+}
