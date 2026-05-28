@@ -26,6 +26,13 @@ export const pushRegistry: PushRegistry = {
             url: "/trackers/books",
             active: true,
         },
+        {
+            id: "budget",
+            title: "NoodleNook 'My Money' Now Active!",
+            body: "Version 1 of Bills & Income and Budget Calendar are now active.",
+            url: "/home",
+            active: true,
+        },
     ],
 };
 
