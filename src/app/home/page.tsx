@@ -45,27 +45,27 @@ export default function HomePage() {
                     <h2>Weight</h2>
                     <p>Log your weight & view progress over time.</p>
                 </Link>
-                <Link href="/meals" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Meals</h2>
                     <p>Track meals, food patterns & routines.</p>
                 </Link>
-                <Link href="/recipes" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Recipes</h2>
                     <p>Put recipes in on the go to come back to later.</p>
                 </Link>
-                <Link href="/weights" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Health</h2>
                     <p>Log your gym weights, times, etc. as you move through your health journey.</p>
                 </Link>
-                <Link href="/mood" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Mood</h2>
                     <p>Check in with how you are feeling each day.</p>
                 </Link>
-                <Link href="/habits" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Habits</h2>
                     <p>Keep up with recurring habits & daily goals.</p>
@@ -106,22 +106,22 @@ export default function HomePage() {
                     <h2>Notes</h2>
                     <p>Jot down quick ideas or long-term goals in a standard notepad format.</p>
                 </Link>
-                <Link href="/groceries" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Groceries</h2>
                     <p>Create your grocery list to take on the go.</p>
                 </Link>
-                <Link href="/shopping" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Shopping</h2>
                     <p>Create other shopping lists to take with you on your day out.</p>
                 </Link>
-                <Link href="/gifts" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Gifts</h2>
                     <p>Keep track of what you want for a special occasion or what you plan to get others.</p>
                 </Link>
-                <Link href="/customlist" className={global.card}>
+                <Link href="/construction" className={global.card}>
                     <h1 className={global.subWarn} style={{ fontSize: 14 }}>COMING SOON!</h1>
                     <h2>Create a Custom List</h2>
                     <p>Create your own!</p>
