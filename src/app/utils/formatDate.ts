@@ -18,3 +18,67 @@ export function getCurrentMonthValue() {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 }
+
+export function getDateOnly(value: string | null | undefined) {
+    if (!value) return "";
+
+    return value.split("T")[0];
+}
+
+export function getTimeOnly(value: string | null | undefined) {
+    if (!value) return "";
+
+    return value.slice(0, 5);
+}
+
+export function formatHoursFromMinutes(minutes: number | string | null | undefined) {
+    const numericMinutes = Number(minutes || 0);
+    const hours = numericMinutes / 60;
+
+    return `${hours.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })} hrs`;
+}
+
+export function minutesToHoursInput(minutes: number | string | null | undefined) {
+    const numericMinutes = Number(minutes || 0);
+
+    if (!numericMinutes) return "";
+
+    return String(numericMinutes / 60);
+}
+
+export function hoursToMinutes(value: string) {
+    const numericHours = Number(value);
+
+    if (!Number.isFinite(numericHours)) return 0;
+
+    return Math.round(numericHours * 60);
+}
+
+export function getMinutesBetweenTimes(
+    startTime: string | null | undefined,
+    endTime: string | null | undefined
+) {
+    if (!startTime || !endTime) return 0;
+
+    const [startHours, startMinutes] = startTime.split(":").map(Number);
+    const [endHours, endMinutes] = endTime.split(":").map(Number);
+
+    if (
+        !Number.isFinite(startHours) ||
+        !Number.isFinite(startMinutes) ||
+        !Number.isFinite(endHours) ||
+        !Number.isFinite(endMinutes)
+    ) {
+        return 0;
+    }
+
+    const startTotal = startHours * 60 + startMinutes;
+    const endTotal = endHours * 60 + endMinutes;
+
+    if (endTotal <= startTotal) return 0;
+
+    return endTotal - startTotal;
+}

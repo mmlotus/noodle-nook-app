@@ -209,6 +209,15 @@
     flex-shrink: 0;
 }
 
+.shareUserDetails {
+    grid-template-columns: minmax(140px, 1fr) minmax(260px, 2fr) minmax(120px, 1fr);
+}
+
+.shareUserDetails .historyValue {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 @media (max-width: 900px) {
     .quickEntryGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

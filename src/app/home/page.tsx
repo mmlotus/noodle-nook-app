@@ -136,6 +136,14 @@ export default function HomePage() {
                     <h2>Mileage</h2>
                     <p>Track your mileage</p>
                 </Link>
+                <Link href="/timesheets" className={global.card}>
+                    <h2>Time Tracking</h2>
+                    <p>Log your time & build timesheets.</p>
+                </Link>
+                <Link href="/timesheets/shared" className={global.card}>
+                    <h2>Shared Timesheets</h2>
+                    <p>View timesheets shared with you & manage timesheets you have shared.</p>
+                </Link>
             </div>
 
             <div className={global.fullWidthSeparator} />
