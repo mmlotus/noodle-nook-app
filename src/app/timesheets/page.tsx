@@ -38,6 +38,19 @@ export default function TimesheetsPage() {
             });
     }, [timesheets]);
 
+    function getEstimatedPay(timesheet: TimesheetSummary) {
+        if (!timesheet.is_payable || !timesheet.hourly_rate) return 0;
+
+        const totalMinutes = Number(timesheet.total_minutes || 0);
+        const hourlyRate = Number(timesheet.hourly_rate || 0);
+
+        if (!Number.isFinite(totalMinutes) || !Number.isFinite(hourlyRate)) {
+            return 0;
+        }
+
+        return (totalMinutes / 60) * hourlyRate;
+    }
+
     function formatHours(minutes: number | string | null) {
         const numericMinutes = Number(minutes || 0);
         const hours = numericMinutes / 60;
@@ -173,6 +186,19 @@ export default function TimesheetsPage() {
                                                     {formatHours(timesheet.total_minutes)}
                                                 </span>
                                             </div>
+
+                                            {timesheet.is_payable && (
+                                                <div>
+                                                    <span className={styles.historyLabel}>Estimated Pay</span>
+                                                    <span className={styles.historyValue}>
+                                                        ${getEstimatedPay(timesheet).toFixed(2)}
+                                                    </span>
+
+                                                    <span className={styles.historySubValue}>
+                                                        ${Number(timesheet.hourly_rate || 0).toFixed(2)}/hr
+                                                    </span>
+                                                </div>
+                                            )}
 
                                             <div>
                                                 <span className={styles.historyLabel}>Entries</span>
