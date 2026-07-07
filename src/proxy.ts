@@ -10,7 +10,6 @@ const publicRoutes = [
     "/privacy",
     "/terms",
     "/api/push/cron",
-    "/standings",
 ];
 
 const publicApiRoutes = [
