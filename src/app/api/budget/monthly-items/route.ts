@@ -8,6 +8,10 @@ export const POST = withUser(async (req, _context, user) => {
     try {
         const body = await req.json();
 
+        const budgetId = cleanString(body.budgetId);
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
+
         const budgetMonthId = cleanString(body.budget_month_id);
         const name = cleanString(body.name);
         const itemType = cleanString(body.item_type);
@@ -29,9 +33,10 @@ export const POST = withUser(async (req, _context, user) => {
                 FROM budget_months
                 WHERE id = $1
                     AND user_id = $2
+                    AND budget_id = $3
                 LIMIT 1
             `,
-            [budgetMonthId, user.id]
+            [budgetMonthId, user.id, budgetId]
         );
 
         if (monthCheck.length === 0) return jsonError("Budget month not found.", 404);
@@ -40,6 +45,7 @@ export const POST = withUser(async (req, _context, user) => {
             `
                 INSERT INTO budget_monthly_items (
                     user_id,
+                    budget_id,
                     budget_month_id,
                     recurring_item_id,
                     name,
@@ -55,13 +61,14 @@ export const POST = withUser(async (req, _context, user) => {
                     updated_at
                 )
                 VALUES (
-                    $1, $2, NULL, $3, $4,
-                    $5, $6, NULL, 'pending',
-                    NULL, $7, true, 0, CURRENT_TIMESTAMP
+                    $1, $2, $3, NULL, $4,
+                    $5, $6, $7, NULL, 'pending',
+                    NULL, $8, true, 0, CURRENT_TIMESTAMP
                 )
                 RETURNING
                     id,
                     user_id,
+                    budget_id,
                     budget_month_id,
                     recurring_item_id,
                     name,
@@ -79,6 +86,7 @@ export const POST = withUser(async (req, _context, user) => {
             `,
             [
                 user.id,
+                budgetId,
                 budgetMonthId,
                 name,
                 itemType,
@@ -101,6 +109,10 @@ export const POST = withUser(async (req, _context, user) => {
 export const PATCH = withUser(async (req, _context, user) => {
     try {
         const body = await req.json();
+
+        const budgetId = cleanString(body.budgetId);
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
         
         const id = cleanString(body.id);
 
@@ -126,7 +138,7 @@ export const PATCH = withUser(async (req, _context, user) => {
 
         const result = await db.query(
             `
-                UPDATE budget_monthly_items
+                UPDATE budget_monthly_items AS bmi
                 SET
                     name = $1,
                     item_date = $2,
@@ -136,25 +148,29 @@ export const PATCH = withUser(async (req, _context, user) => {
                     completed_date = $6,
                     notes = $7,
                     updated_at = CURRENT_TIMESTAMP
-                WHERE id = $8
-                    AND user_id = $9
+                FROM budget_months bm
+                WHERE bmi.id = $8
+                    AND bmi.user_id = $9
+                    AND bm.id = bmi.budget_month_id
+                    AND bm.budget_id = $10
+                    AND bm.user_id = $9
                 RETURNING
-                    id,
-                    user_id,
-                    budget_month_id,
-                    recurring_item_id,
-                    name,
-                    item_type,
-                    item_date,
-                    expected_amount,
-                    actual_amount,
-                    status,
-                    completed_date,
-                    notes,
-                    is_one_time,
-                    sort_order,
-                    created_at,
-                    updated_at
+                    bmi.id,
+                    bmi.user_id,
+                    bmi.budget_month_id,
+                    bmi.recurring_item_id,
+                    bmi.name,
+                    bmi.item_type,
+                    bmi.item_date,
+                    bmi.expected_amount,
+                    bmi.actual_amount,
+                    bmi.status,
+                    bmi.completed_date,
+                    bmi.notes,
+                    bmi.is_one_time,
+                    bmi.sort_order,
+                    bmi.created_at,
+                    bmi.updated_at
             `,
             [
                 name,
@@ -166,6 +182,7 @@ export const PATCH = withUser(async (req, _context, user) => {
                 notes,
                 id,
                 user.id,
+                budgetId,
             ]
         );
 
@@ -182,19 +199,28 @@ export const PATCH = withUser(async (req, _context, user) => {
 export const DELETE = withUser(async (req, _context, user) => {
     try {
         const body = await req.json();
+
+        const budgetId = cleanString(body.budgetId);
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
+
         const id = cleanString(body.id);
 
         if (!id) return jsonError("Invalid monthly budget item ID.", 400);
 
         const result = await db.query(
             `
-                DELETE FROM budget_monthly_items
-                WHERE id = $1
-                    AND user_id = $2
-                    AND is_one_time = true
-                RETURNING id
+                DELETE FROM budget_monthly_items bmi
+                USING budget_months bm
+                WHERE bmi.id = $1
+                    AND bmi.user_id = $2
+                    AND bmi.is_one_time = true
+                    AND bm.id = bmi.budget_month_id
+                    AND bm.user_id = $2
+                    AND bm.budget_id = $3
+                RETURNING bmi.id
             `,
-            [id, user.id]
+            [id, user.id, budgetId]
         );
 
         if (result.length === 0) return jsonError("One-time monthly item not found.", 404);

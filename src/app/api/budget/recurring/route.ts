@@ -4,18 +4,40 @@ import { validateBudgetRecurringPayload } from "@/lib/budget";
 import db from "@/lib/db";
 import { BudgetRecurringCreatePayload, BudgetRecurringUpdatePayload } from "@/types/budget";
 
-export const GET = withUser(async (_req, _context, user) => {
+function isValidId(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
+}
+
+export const GET = withUser(async (req, _context, user) => {
     try {
+        const { searchParams } = new URL(req.url);
+        const budgetId = searchParams.get("budgetId");
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
+
         const result = await db.query(
             `
                 SELECT
-                    id, user_id, name, item_type, frequency,
-                    custom_frequency_label, expected_amount,
-                    day_of_month, recurrence_anchor_date,
-                    start_date, end_date, is_active, notes,
-                    sort_order, created_at, updated_at
+                    id,
+                    user_id,
+                    budget_id,
+                    name,
+                    item_type,
+                    frequency,
+                    custom_frequency_label,
+                    expected_amount,
+                    day_of_month,
+                    recurrence_anchor_date,
+                    start_date,
+                    end_date,
+                    is_active,
+                    notes,
+                    sort_order,
+                    created_at,
+                    updated_at
                 FROM budget_recurring_items
                 WHERE user_id = $1
+                    AND budget_id = $2
                 ORDER BY
                     is_active DESC,
                     item_type ASC,
@@ -23,7 +45,7 @@ export const GET = withUser(async (_req, _context, user) => {
                     day_of_month ASC NULLS LAST,
                     name ASC
             `,
-            [user.id]
+            [user.id, budgetId]
         );
 
         return jsonOk({ items: result });
@@ -35,12 +57,17 @@ export const GET = withUser(async (_req, _context, user) => {
 export const POST = withUser(async (req, _context, user) => {
     try {
         const body = (await req.json()) as BudgetRecurringCreatePayload;
+        const budgetId = body.budgetId;
+
+        if (!isValidId(budgetId)) return jsonError("Invalid budget ID.", 400);
+
         const validated = validateBudgetRecurringPayload(body);
 
         const result = await db.query(
             `
                 INSERT INTO budget_recurring_items (
                     user_id,
+                    budget_id,
                     name,
                     item_type,
                     frequency,
@@ -55,14 +82,17 @@ export const POST = withUser(async (req, _context, user) => {
                     sort_order,
                     updated_at
                 )
-                VALUES (
-                    $1, $2, $3, $4, $5,
+                SELECT
+                    $1, b.id, $3, $4, $5,
                     $6, $7, $8, $9, $10,
-                    $11, $12, $13, NOW()
-                )
+                    $11, $12, $13, $14, NOW()
+                FROM budgets b
+                WHERE b.id = $2
+                    AND b.owner_user_id = $1
                 RETURNING
                     id,
                     user_id,
+                    budget_id,
                     name,
                     item_type,
                     frequency,
@@ -80,6 +110,7 @@ export const POST = withUser(async (req, _context, user) => {
             `,
             [
                 user.id,
+                budgetId,
                 validated.name,
                 validated.itemType,
                 validated.frequency,
@@ -96,7 +127,7 @@ export const POST = withUser(async (req, _context, user) => {
         );
 
         if (result.length === 0) {
-            return jsonError("Recurring budget item was not created.", 400);
+            return jsonError("Budget was not found or recurring budget item was not created.", 404);
         }
 
         return jsonOk({ success: true, item: result[0] });
@@ -113,13 +144,15 @@ export const PATCH = withUser(async (req, _context, user) => {
     try {
         const body = (await req.json()) as BudgetRecurringUpdatePayload;
 
-        if (!body.id || typeof body.id !== "string") return jsonError("Invalid recurring budget item ID.", 400);
+        if (!isValidId(body.id)) return jsonError("Invalid recurring budget item ID.", 400);
+
+        if (!isValidId(body.budgetId)) return jsonError("Invalid budget ID.", 400);
 
         const validated = validateBudgetRecurringPayload(body);
 
         const result = await db.query(
             `
-                UPDATE budget_recurring_items
+                UPDATE budget_recurring_items AS bri
                 SET
                     name = $1,
                     item_type = $2,
@@ -134,25 +167,30 @@ export const PATCH = withUser(async (req, _context, user) => {
                     notes = $11,
                     sort_order = $12,
                     updated_at = NOW()
-                WHERE id = $13
-                    AND user_id = $14
+                FROM budgets b
+                WHERE bri.id = $13
+                    AND bri.user_id = $14
+                    AND bri.budget_id = $15
+                    AND b.id = bri.budget_id
+                    AND b.owner_user_id = $14
                 RETURNING
-                    id,
-                    user_id,
-                    name,
-                    item_type,
-                    frequency,
-                    custom_frequency_label,
-                    expected_amount,
-                    day_of_month,
-                    recurrence_anchor_date,
-                    start_date,
-                    end_date,
-                    is_active,
-                    notes,
-                    sort_order,
-                    created_at,
-                    updated_at
+                    bri.id,
+                    bri.user_id,
+                    bri.budget_id,
+                    bri.name,
+                    bri.item_type,
+                    bri.frequency,
+                    bri.custom_frequency_label,
+                    bri.expected_amount,
+                    bri.day_of_month,
+                    bri.recurrence_anchor_date,
+                    bri.start_date,
+                    bri.end_date,
+                    bri.is_active,
+                    bri.notes,
+                    bri.sort_order,
+                    bri.created_at,
+                    bri.updated_at
             `,
             [
                 validated.name,
@@ -169,6 +207,7 @@ export const PATCH = withUser(async (req, _context, user) => {
                 validated.sortOrder,
                 body.id,
                 user.id,
+                body.budgetId,
             ]
         );
 
@@ -186,37 +225,47 @@ export const PATCH = withUser(async (req, _context, user) => {
 
 export const DELETE = withUser(async (req, _context, user) => {
     try {
-        const { id } = await req.json();
+        const body = (await req.json()) as {
+            id?: unknown;
+            budgetId?: unknown;
+        };
 
-        if (!id || typeof id !== "string") return jsonError("Invalid reucrring budget item ID.", 400);
+        if (!isValidId(body.id)) return jsonError("Invalid recurring budget item ID.", 400);
+
+        if (!isValidId(body.budgetId)) return jsonError("Invalid budget ID.", 400);
 
         const result = await db.query(
             `
-                UPDATE budget_recurring_items
+                UPDATE budget_recurring_items AS bri
                 SET
                     is_active = false,
                     updated_at = NOW()
-                WHERE id = $1
-                    AND user_id = $2
+                FROM budgets b
+                WHERE bri.id = $1
+                    AND bri.user_id = $2
+                    AND bri.budget_id = $3
+                    AND b.id = bri.budget_id
+                    AND b.owner_user_id = $2
                 RETURNING
-                    id,
-                    user_id,
-                    name,
-                    item_type,
-                    frequency,
-                    custom_frequency_label,
-                    expected_amount,
-                    day_of_month,
-                    recurrence_anchor_date,
-                    start_date,
-                    end_date,
-                    is_active,
-                    notes,
-                    sort_order,
-                    created_at,
-                    updated_at
+                    bri.id,
+                    bri.user_id,
+                    bri.budget_id,
+                    bri.name,
+                    bri.item_type,
+                    bri.frequency,
+                    bri.custom_frequency_label,
+                    bri.expected_amount,
+                    bri.day_of_month,
+                    bri.recurrence_anchor_date,
+                    bri.start_date,
+                    bri.end_date,
+                    bri.is_active,
+                    bri.notes,
+                    bri.sort_order,
+                    bri.created_at,
+                    bri.updated_at
             `,
-            [id, user.id]
+            [body.id, user.id, body.budgetId]
         );
 
         if (result.length === 0) return jsonError("Recurring budget item not found.", 404);

@@ -5,6 +5,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import DragScrollContainer from "@/components/DragScrollContainer";
 import { formatCurrency, isValidMoneyInput } from "@/app/utils/formatMisc";
 import {
+    Budget,
     BudgetMonth,
     BudgetMonthlyItem,
     BudgetMonthlyItemFormState,
@@ -28,8 +29,15 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Pencil, Plus, SaveIcon, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { getBudgetTheme } from "@/lib/budgetThemes";
 
 export default function BudgetPage() {
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [selectedBudgetId, setSelectedBudgetId] = useState("");
+    const [visibleBudgetIds, setVisibleBudgetIds] = useState<string[]>([]);
+    const [calendarItemsByBudget, setCalendarItemsByBudget] = useState<Record<string, BudgetMonthlyItem[]>>({});
+    const [visibleGeneratedBudgetIds, setVisibleGeneratedBudgetIds] = useState<string[]>([]);
+
     const [selectedMonth, setSelectedMonth] = useState(getBudgetCurrentMonthValue());
     const [budgetMonth, setBudgetMonth] = useState<BudgetMonth | null>(null);
     const [items, setItems] = useState<BudgetMonthlyItem[]>([]);
@@ -63,6 +71,16 @@ export default function BudgetPage() {
         return getBudgetCalendarDays(selectedMonth);
     }, [selectedMonth]);
 
+    const calendarItems = useMemo(() => {
+        if (visibleBudgetIds.length === 0) return [];
+
+        return visibleBudgetIds.flatMap((budgetId) => calendarItemsByBudget[budgetId] || []);
+    }, [visibleBudgetIds, calendarItemsByBudget]);
+
+    const budgetsById = useMemo(() => {
+        return new Map(budgets.map((budget) => [budget.id, budget]));
+    }, [budgets]);
+
     const summary = useMemo(() => {
         const baseSummary = getBudgetMonthlySummary(items);
         const startingBalanceValue = Number(budgetMonth?.starting_balance || 0);
@@ -82,11 +100,56 @@ export default function BudgetPage() {
         };
     }, [items, budgetMonth]);
 
-    const loadBudgetMonth = useCallback(async (monthValue: string, showLoading = false) => {
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadBudgets() {
+            try {
+                const res = await fetch("/api/budget");
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to load budgets.");
+                }
+
+                if (cancelled) return;
+
+                const loadedBudgets = (data.budgets || []) as Budget[];
+
+                setBudgets(loadedBudgets);
+
+                if (loadedBudgets.length > 0) {
+                    const firstBudgetId = loadedBudgets[0].id;
+
+                    setSelectedBudgetId(firstBudgetId);
+                    setVisibleBudgetIds([firstBudgetId]);
+                } else {
+                    setLoading(false);
+                }
+            } catch (err) {
+                console.error("loadBudgets error:", err);
+
+                if (!cancelled) {
+                    toast.error("Could not load budgets. Please try again later.");
+                    setLoading(false);
+                }
+            }
+        }
+
+        void loadBudgets();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const loadBudgetMonth = useCallback(async (budgetId: string, monthValue: string, showLoading = false) => {
+        if (!budgetId) return;
+
         if (showLoading) setLoading(true);
 
         try {
-            const res = await fetch(`/api/budget/month?month=${monthValue}`);
+            const res = await fetch(`/api/budget/month?budgetId=${encodeURIComponent(budgetId)}&month=${encodeURIComponent(monthValue)}`);
             const data = await res.json();
 
             if (!res.ok) {
@@ -122,14 +185,73 @@ export default function BudgetPage() {
     }, []);
 
     useEffect(() => {
+        if (!selectedBudgetId) return;
+
         const timeoutId = window.setTimeout(() => {
-            void loadBudgetMonth(selectedMonth);
+            void loadBudgetMonth(selectedBudgetId, selectedMonth);
         }, 0);
 
         return () => window.clearTimeout(timeoutId);
-    }, [loadBudgetMonth, selectedMonth]);
+    }, [loadBudgetMonth, selectedBudgetId, selectedMonth]);
+
+    useEffect(() => {
+        if (visibleBudgetIds.length === 0) return;
+
+        let cancelled = false;
+
+        async function loadVisibleBudgetMonths() {
+            try {
+                const results = await Promise.all(
+                    visibleBudgetIds.map(async (budgetId) => {
+                        const res = await fetch(`/api/budget/month?budgetId=${encodeURIComponent(budgetId)}&month=${encodeURIComponent(selectedMonth)}`);
+
+                        const data = await res.json();
+
+                        if (!res.ok) throw new Error(data.error || "Failed to load visible budget month.");
+
+                        return {
+                            budgetId,
+                            monthExists: Boolean(data.month),
+                            items: (data.items || []) as BudgetMonthlyItem[],
+                        };
+                    })
+                );
+
+                if (cancelled) return;
+
+                const nextItemsByBudget: Record<string, BudgetMonthlyItem[]> = {};
+                const nextGeneratedBudgetIds: string[] = [];
+
+                for (const result of results) {
+                    nextItemsByBudget[result.budgetId] = result.items;
+
+                    if (result.monthExists) nextGeneratedBudgetIds.push(result.budgetId);
+                }
+
+                setCalendarItemsByBudget(nextItemsByBudget);
+                setVisibleGeneratedBudgetIds(nextGeneratedBudgetIds);
+            } catch (err) {
+                console.error("loadVisibleBudgetMonths error:", err);
+
+                if (!cancelled) {
+                    toast.error("Could not load visible budgets.");
+                }
+            }
+        }
+
+        void loadVisibleBudgetMonths();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [visibleBudgetIds, selectedMonth]);
 
     async function generateMonth() {
+        if (!selectedBudgetId) {
+            toast.error("Please select a budget.");
+            return;
+        }
+
         setGenerating(true);
 
         try {
@@ -137,6 +259,7 @@ export default function BudgetPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    budgetId: selectedBudgetId,
                     month: selectedMonth,
                     starting_balance: startingBalance || 0,
                     savings_balance: savingsBalance || null,
@@ -166,6 +289,11 @@ export default function BudgetPage() {
             setEditingBalanceField(null);
             setBudgetMonth(data.month || null);
             setItems((data.items || []) as BudgetMonthlyItem[]);
+            setCalendarItemsByBudget((current) => ({
+                ...current,
+                [selectedBudgetId]: (data.items || []) as BudgetMonthlyItem[],
+            }));
+            setVisibleGeneratedBudgetIds((current) => current.includes(selectedBudgetId) ? current : [...current, selectedBudgetId]);
             setSelectedItem(null);
             setModalForm(null);
             setStartingBalance("");
@@ -195,6 +323,7 @@ export default function BudgetPage() {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    budgetId: selectedBudgetId,
                     month: selectedMonth,
                     starting_balance: balanceForm.starting_balance || 0,
                     savings_balance: balanceForm.savings_balance || null,
@@ -267,6 +396,7 @@ export default function BudgetPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    budgetId: selectedBudgetId,
                     budget_month_id: budgetMonth.id,
                     name: oneTimeName,
                     item_type: oneTimeForm.item_type,
@@ -285,6 +415,13 @@ export default function BudgetPage() {
             const savedItem = data.item as BudgetMonthlyItem;
 
             setItems((current) => [...current, savedItem]);
+            setCalendarItemsByBudget((current) => ({
+                ...current,
+                [selectedBudgetId]: [
+                    ...(current[selectedBudgetId] || []),
+                    savedItem,
+                ],
+            }));
 
             closeOneTimeModal();
 
@@ -396,6 +533,7 @@ export default function BudgetPage() {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    budgetId: selectedBudgetId,
                     id: modalForm.id,
                     name: modalForm.name,
                     item_date: modalForm.item_date || null,
@@ -418,6 +556,12 @@ export default function BudgetPage() {
             setItems((current) =>
                 current.map((item) => item.id === savedItem.id ? savedItem : item)
             );
+            setCalendarItemsByBudget((current) => ({
+                ...current,
+                [selectedBudgetId]: (current[selectedBudgetId] || []).map((item) =>
+                    item.id === savedItem.id ? savedItem : item
+                ),
+            }));
 
             setSelectedItem(null);
             setModalForm(null);
@@ -435,6 +579,19 @@ export default function BudgetPage() {
             setSavingId("");
         }
     }
+
+    const selectedMonthLabel = useMemo(() => {
+        const date = new Date(`${selectedMonth}-01T00:00:00`);
+
+        if (Number.isNaN(date.getTime())) {
+            return "Budget Calendar";
+        }
+
+        return date.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+        });
+    }, [selectedMonth]);
 
     if (loading) return <LoadingSpinner />;
 
@@ -458,6 +615,37 @@ export default function BudgetPage() {
 
                         <div className={styles.recurringHeaderActions}>
                             <div className={styles.estimateMonthField}>
+                                <label className={global.label}>Budget</label>
+
+                                <select
+                                    className={global.input}
+                                    value={selectedBudgetId}
+                                    onChange={(event) => {
+                                        const nextBudgetId = event.target.value;
+                                        setSelectedBudgetId(nextBudgetId);
+                                        setVisibleBudgetIds((current) => current.includes(nextBudgetId) ? current : [...current, nextBudgetId]);
+                                        setBudgetMonth(null);
+                                        setItems([]);
+                                        setSelectedItem(null);
+                                        setModalForm(null);
+                                        setEditingBalanceField(null);
+                                        setStartingBalance("");
+                                        setSavingsBalance("");
+                                        setBalanceForm({
+                                            starting_balance: "",
+                                            savings_balance: "",
+                                        });
+                                    }}
+                                >
+                                    {budgets.map((budget) => (
+                                        <option key={budget.id} value={budget.id}>
+                                            {budget.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.estimateMonthField}>
                                 <label className={global.label}>Budget Month</label>
                                 <input
                                     type="month"
@@ -470,6 +658,40 @@ export default function BudgetPage() {
                             <Link href="/budget/recurring" className={global.linkBtn}>
                                 Manage Recurring Items
                             </Link>
+                        </div>
+                    </div>
+
+                    <div className={styles.budgetVisibilityList}>
+                        <label className={global.label}>Visible Budgets</label>
+
+                        <div className={styles.budgetVisibilityOptions}>
+                            {budgets.map((budget) => {
+                                const isVisible = visibleBudgetIds.includes(budget.id);
+
+                                return (
+                                    <label key={budget.id} className={styles.checkboxRow}>
+                                        <input
+                                            type="checkbox"
+                                            checked={isVisible}
+                                            onChange={() => {
+                                                setVisibleBudgetIds((current) => current.includes(budget.id)
+                                                    ? current.filter((id) => id !== budget.id)
+                                                    : [...current, budget.id]
+                                                );
+                                            }}
+                                        />
+
+                                        <span
+                                            className={styles.budgetThemeMarker}
+                                            style={{
+                                                background: getBudgetTheme(budget.theme_key).completed,
+                                            }}
+                                        />
+
+                                        <span>{budget.name}</span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -685,7 +907,7 @@ export default function BudgetPage() {
                     )}
                 </section>
 
-                {budgetMonth && (
+                {visibleBudgetIds.some((budgetId) => visibleGeneratedBudgetIds.includes(budgetId)) && (
                     <section className={styles.section}>
                         <div className={styles.calendarHeader}>
                             <button
@@ -697,7 +919,7 @@ export default function BudgetPage() {
                                 <ChevronLeft size={20} />
                             </button>
 
-                            <h2 className={global.headLeft}>Budget Calendar</h2>
+                            <h2 className={global.headLeft}>{selectedMonthLabel}</h2>
 
                             <button
                                 type="button"
@@ -722,7 +944,7 @@ export default function BudgetPage() {
 
                             <div className={styles.calendarGrid}>
                                 {calendarDays.map((day) => {
-                                    const dayItems = getBudgetItemsForDate(items, day.date);
+                                    const dayItems = getBudgetItemsForDate(calendarItems, day.date);
 
                                     return (
                                         <div
@@ -752,23 +974,57 @@ export default function BudgetPage() {
                                             </div>
 
                                             <div className={styles.calendarEvents}>
-                                                {dayItems.map((item) => (
-                                                    <button
-                                                        key={item.id}
-                                                        type="button"
-                                                        className={
-                                                            item.status === "completed"
-                                                                ? styles.calendarEventCompleted
-                                                                : item.status === "skipped"
-                                                                    ? styles.calendarEventSkipped
-                                                                    : styles.calendarEventPending
-                                                        }
-                                                        onClick={() => openItemModal(item)}
-                                                    >
-                                                        <span>{item.name}</span>
-                                                        <strong>{formatCurrency(item.expected_amount)}</strong>
-                                                    </button>
-                                                ))}
+                                                {dayItems.map((item) => {
+                                                    const itemBudget = budgetsById.get(item.budget_id);
+                                                    const itemTheme = getBudgetTheme(itemBudget?.theme_key);
+
+                                                    const background =
+                                                        item.status === "completed"
+                                                            ? itemTheme.completed
+                                                            : item.status === "skipped"
+                                                                ? itemTheme.skipped
+                                                                : itemTheme.pending;
+
+                                                    const textColor =
+                                                        item.status === "completed"
+                                                            ? itemTheme.completedText
+                                                            : item.status === "skipped"
+                                                                ? itemTheme.skippedText
+                                                                : itemTheme.pendingText;
+
+                                                    return (
+                                                        <button
+                                                            key={item.id}
+                                                            type="button"
+                                                            className={
+                                                                item.status === "completed"
+                                                                    ? styles.calendarEventCompleted
+                                                                    : item.status === "skipped"
+                                                                        ? styles.calendarEventSkipped
+                                                                        : styles.calendarEventPending
+                                                            }
+                                                            style={{
+                                                                background,
+                                                                borderColor: background,
+                                                                color: textColor,
+                                                            }}
+                                                            onClick={() => {
+                                                                if (item.budget_id !== selectedBudgetId) return;
+
+                                                                openItemModal(item);
+                                                            }}
+                                                            disabled={item.budget_id !== selectedBudgetId}
+                                                            title={
+                                                                item.budget_id === selectedBudgetId
+                                                                    ? `Edit ${item.name} — ${itemBudget?.name || "Budget"}`
+                                                                    : `${itemBudget?.name || "Budget"} — select this budget above to edit`
+                                                            }
+                                                        >
+                                                            <span>{item.name}</span>
+                                                            <strong>{formatCurrency(item.expected_amount)}</strong>
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     );

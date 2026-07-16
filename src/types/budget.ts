@@ -1,3 +1,22 @@
+export type BudgetThemeKey =
+    | "berries"
+    | "azure"
+    | "sage"
+    | "seafoam"
+    | "citrus"
+    | "blush";
+
+export type BudgetTheme = {
+    key: BudgetThemeKey;
+    label: string;
+    pending: string;
+    pendingText: string;
+    completed: string;
+    completedText: string;
+    skipped: string;
+    skippedText: string;
+};
+
 export type BudgetItemType = "income" | "bill" | "expected_expense";
 
 export type BudgetFrequency =
@@ -13,11 +32,22 @@ export type BudgetFrequency =
 
 export type BudgetMonthlyStatus = "pending" | "completed" | "skipped";
 
+export interface Budget {
+    id: string;
+    owner_user_id: string;
+    name: string;
+    color: string | null;
+    theme_key: BudgetThemeKey;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+};
 
 /* BUDGET RECURRING ITEMS */
 export type BudgetRecurringItem = {
     id: string;
     user_id: string;
+    budget_id: string;
     name: string;
     item_type: BudgetItemType;
     frequency: BudgetFrequency;
@@ -35,6 +65,7 @@ export type BudgetRecurringItem = {
 };
 
 export type BudgetRecurringCreatePayload = {
+    budgetId: string;
     name: string;
     item_type: BudgetItemType;
     frequency: BudgetFrequency;
@@ -73,6 +104,7 @@ export type ValidatedBudgetRecurringPayload = {
 export type BudgetMonth = {
     id: string;
     user_id: string;
+    budget_id: string;
     budget_month: string;
     starting_balance: string;
     savings_balance: string | null;
@@ -84,6 +116,7 @@ export type BudgetMonth = {
 export type BudgetMonthlyItem = {
     id: string;
     user_id: string;
+    budget_id: string;
     budget_month_id: string;
     recurring_item_id: string | null;
     name: string;

@@ -4,12 +4,13 @@ import { cleanBudgetMonthAmount, cleanOptionalBudgetMonthAmount, getBudgetMonthF
 import db from "@/lib/db";
 import { BudgetRecurringItem } from "@/types/budget";
 
-async function getBudgetMonthAndItems(userId: string, budgetMonth: string) {
+async function getBudgetMonthAndItems(userId: string, budgetId: string, budgetMonth: string) {
     const monthRows = await db.query(
         `
             SELECT
                 id,
                 user_id,
+                budget_id,
                 budget_month,
                 starting_balance,
                 savings_balance,
@@ -18,10 +19,11 @@ async function getBudgetMonthAndItems(userId: string, budgetMonth: string) {
                 updated_at
             FROM budget_months
             WHERE user_id = $1
-                AND budget_month = $2
+                AND budget_id = $2
+                AND budget_month = $3
             LIMIT 1
         `,
-        [userId, budgetMonth]
+        [userId, budgetId, budgetMonth]
     );
 
     if (monthRows.length === 0) {
@@ -36,6 +38,7 @@ async function getBudgetMonthAndItems(userId: string, budgetMonth: string) {
             SELECT
                 id,
                 user_id,
+                budget_id,
                 budget_month_id,
                 recurring_item_id,
                 name,
@@ -73,13 +76,18 @@ export const GET = withUser(async (req, _context, user) => {
     try {
         const { searchParams } = new URL(req.url);
         const monthParam = searchParams.get("month");
+        const budgetId = searchParams.get("budgetId");
 
         if (!monthParam) {
             return jsonError("Budget month is required.", 400);
         }
 
+        if (!budgetId) {
+            return jsonError("Budget ID is required.", 400);
+        }
+
         const budgetMonth = getBudgetMonthFromValue(monthParam);
-        const data = await getBudgetMonthAndItems(user.id, budgetMonth);
+        const data = await getBudgetMonthAndItems(user.id, budgetId, budgetMonth);
 
         return jsonOk(data);
     } catch (err) {
@@ -94,11 +102,15 @@ export const GET = withUser(async (req, _context, user) => {
 export const POST = withUser(async (req, _context, user) => {
     try {
         const body = await req.json();
+        const budgetId = typeof body.budgetId === "string" ? body.budgetId.trim() : "";
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
+
         const budgetMonth = getBudgetMonthFromValue(String(body.month || ""));
         const startingBalance = cleanBudgetMonthAmount(body.starting_balance, 0);
         const savingsBalance = cleanOptionalBudgetMonthAmount(body.savings_balance);
 
-        const existing = await getBudgetMonthAndItems(user.id, budgetMonth);
+        const existing = await getBudgetMonthAndItems(user.id, budgetId, budgetMonth);
 
         if (existing.month && existing.items.length > 0) {
             return jsonOk({
@@ -113,17 +125,29 @@ export const POST = withUser(async (req, _context, user) => {
             `
                 INSERT INTO budget_months (
                     user_id,
+                    budget_id,
                     budget_month,
                     starting_balance,
                     savings_balance,
                     updated_at
                 )
-                VALUES ($1, $2, $3, $4, NOW())
-                ON CONFLICT (user_id, budget_month)
+                SELECT
+                    $1,
+                    b.id,
+                    $3,
+                    $4,
+                    $5,
+                    NOW()
+                FROM budgets b
+                WHERE b.id = $2
+                    AND b.owner_user_id = $1
+                    AND b.is_active = true
+                ON CONFLICT (user_id, budget_id, budget_month)
                 DO UPDATE SET updated_at = budget_months.updated_at
                 RETURNING
                     id,
                     user_id,
+                    budget_id,
                     budget_month,
                     starting_balance,
                     savings_balance,
@@ -131,7 +155,7 @@ export const POST = withUser(async (req, _context, user) => {
                     created_at,
                     updated_at
             `,
-            [user.id, budgetMonth, startingBalance, savingsBalance]
+            [user.id, budgetId, budgetMonth, startingBalance, savingsBalance]
         );
 
         if (monthResult.length === 0) return jsonError("Budget month could not be created.", 400);
@@ -143,6 +167,7 @@ export const POST = withUser(async (req, _context, user) => {
                 SELECT
                     id,
                     user_id,
+                    budget_id,
                     name,
                     item_type,
                     frequency,
@@ -159,6 +184,7 @@ export const POST = withUser(async (req, _context, user) => {
                     updated_at
                 FROM budget_recurring_items
                 WHERE user_id = $1
+                    AND budget_id = $2
                     AND is_active = true
                 ORDER BY
                     item_type ASC,
@@ -166,7 +192,7 @@ export const POST = withUser(async (req, _context, user) => {
                     day_of_month ASC NULLS LAST,
                     name ASC
             `,
-            [user.id]
+            [user.id, budgetId]
         ) as BudgetRecurringItem[];
 
         let createdCount = 0;
@@ -184,6 +210,7 @@ export const POST = withUser(async (req, _context, user) => {
                     `
                         INSERT INTO budget_monthly_items (
                             user_id,
+                            budget_id,
                             budget_month_id,
                             recurring_item_id,
                             name,
@@ -198,12 +225,13 @@ export const POST = withUser(async (req, _context, user) => {
                         )
                         VALUES (
                             $1, $2, $3, $4, $5,
-                            $6, $7, 'pending', $8, false,
-                            $9, NOW()
+                            $6, $7, $8, 'pending', $9,
+                            false, $10, NOW()
                         )
                     `,
                     [
                         user.id,
+                        budgetId,
                         budgetMonthRow.id,
                         item.id,
                         occurrenceDates.length > 1 ? `${item.name} #${index + 1}` : item.name,
@@ -219,7 +247,7 @@ export const POST = withUser(async (req, _context, user) => {
             }
         }
 
-        const finalData = await getBudgetMonthAndItems(user.id, budgetMonth);
+        const finalData = await getBudgetMonthAndItems(user.id, budgetId, budgetMonth);
 
         return jsonOk({
             success: true,
@@ -240,6 +268,9 @@ export const POST = withUser(async (req, _context, user) => {
 export const PATCH = withUser(async (req, _context, user) => {
     try {
         const body = await req.json();
+        const budgetId = typeof body.budgetId === "string" ? body.budgetId.trim() : "";
+
+        if (!budgetId) return jsonError("Budget ID is required.", 400);
 
         const budgetMonth = getBudgetMonthFromValue(String(body.month || ""));
         const startingBalance = cleanBudgetMonthAmount(body.starting_balance, 0);
@@ -253,10 +284,12 @@ export const PATCH = withUser(async (req, _context, user) => {
                     savings_balance = $2,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = $3
-                    AND budget_month = $4
+                    AND budget_id = $4
+                    AND budget_month = $5
                 RETURNING
                     id,
                     user_id,
+                    budget_id,
                     budget_month,
                     starting_balance,
                     savings_balance,
@@ -264,7 +297,7 @@ export const PATCH = withUser(async (req, _context, user) => {
                     created_at,
                     updated_at
             `,
-            [startingBalance, savingsBalance, user.id, budgetMonth]
+            [startingBalance, savingsBalance, user.id, budgetId, budgetMonth]
         );
 
         if (result.length === 0) {
