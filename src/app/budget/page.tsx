@@ -119,10 +119,33 @@ export default function BudgetPage() {
                 setBudgets(loadedBudgets);
 
                 if (loadedBudgets.length > 0) {
-                    const firstBudgetId = loadedBudgets[0].id;
+                    const validBudgetIds = new Set(
+                        loadedBudgets.map((budget) => budget.id)
+                    );
 
-                    setSelectedBudgetId(firstBudgetId);
-                    setVisibleBudgetIds([firstBudgetId]);
+                    const savedSelectedBudgetId =
+                        window.localStorage.getItem("budget:selectedBudgetId");
+
+                    const savedVisibleBudgetIds = JSON.parse(
+                        window.localStorage.getItem("budget:visibleBudgetIds") || "[]"
+                    ) as string[];
+
+                    const nextSelectedBudgetId =
+                        savedSelectedBudgetId &&
+                            validBudgetIds.has(savedSelectedBudgetId)
+                            ? savedSelectedBudgetId
+                            : loadedBudgets[0].id;
+
+                    const nextVisibleBudgetIds = savedVisibleBudgetIds.filter((id) =>
+                        validBudgetIds.has(id)
+                    );
+
+                    setSelectedBudgetId(nextSelectedBudgetId);
+                    setVisibleBudgetIds(
+                        nextVisibleBudgetIds.length > 0
+                            ? nextVisibleBudgetIds
+                            : [nextSelectedBudgetId]
+                    );
                 } else {
                     setLoading(false);
                 }
@@ -622,8 +645,23 @@ export default function BudgetPage() {
                                     value={selectedBudgetId}
                                     onChange={(event) => {
                                         const nextBudgetId = event.target.value;
+                                        window.localStorage.setItem(
+                                            "budget:selectedBudgetId",
+                                            nextBudgetId
+                                        );
                                         setSelectedBudgetId(nextBudgetId);
-                                        setVisibleBudgetIds((current) => current.includes(nextBudgetId) ? current : [...current, nextBudgetId]);
+                                        setVisibleBudgetIds((current) => {
+                                            const next = current.includes(nextBudgetId)
+                                                ? current
+                                                : [...current, nextBudgetId];
+
+                                            window.localStorage.setItem(
+                                                "budget:visibleBudgetIds",
+                                                JSON.stringify(next)
+                                            );
+
+                                            return next;
+                                        });
                                         setBudgetMonth(null);
                                         setItems([]);
                                         setSelectedItem(null);
@@ -674,10 +712,18 @@ export default function BudgetPage() {
                                             type="checkbox"
                                             checked={isVisible}
                                             onChange={() => {
-                                                setVisibleBudgetIds((current) => current.includes(budget.id)
-                                                    ? current.filter((id) => id !== budget.id)
-                                                    : [...current, budget.id]
-                                                );
+                                                setVisibleBudgetIds((current) => {
+                                                    const next = current.includes(budget.id)
+                                                        ? current.filter((id) => id !== budget.id)
+                                                        : [...current, budget.id];
+
+                                                    window.localStorage.setItem(
+                                                        "budget:visibleBudgetIds",
+                                                        JSON.stringify(next)
+                                                    );
+
+                                                    return next;
+                                                });
                                             }}
                                         />
 

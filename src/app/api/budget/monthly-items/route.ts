@@ -157,6 +157,7 @@ export const PATCH = withUser(async (req, _context, user) => {
                 RETURNING
                     bmi.id,
                     bmi.user_id,
+                    bmi.budget_id,
                     bmi.budget_month_id,
                     bmi.recurring_item_id,
                     bmi.name,
