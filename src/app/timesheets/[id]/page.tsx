@@ -17,6 +17,7 @@ import {
     formatDate,
     formatHoursFromMinutes,
     getDateOnly,
+    getElapsedMinutesFromTime,
     getMinutesBetweenTimes,
     getTimeOnly,
     getTodayDateString,
@@ -52,6 +53,11 @@ export default function TimesheetDetailPage() {
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
 
+    const [liveCategory, setLiveCategory] = useState("");
+    const [liveDescription, setLiveDescription] = useState("");
+    const [clockSaving, setClockSaving] = useState(false);
+    const [activeElapsedMinutes, setActiveElapsedMinutes] = useState(0);
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deletingId, setDeletingId] = useState("");
@@ -73,10 +79,14 @@ export default function TimesheetDetailPage() {
         });
     }, [entries]);
 
+    const activeEntry = useMemo(() => {
+        return entries.find((entry) => !entry.end_time) || null;
+    }, [entries]);
+
     const stats = useMemo(() => {
         return entries.reduce(
             (totals, entry) => {
-                totals.totalMinutes += Number(entry.duration_minutes ?? 0);
+                totals.totalMinutes += entry.end_time ? Number(entry.duration_minutes ?? 0) : 0;
                 totals.entries += 1;
 
                 return totals;
@@ -143,6 +153,24 @@ export default function TimesheetDetailPage() {
             cancelled = true;
         };
     }, [loadTimesheet]);
+
+    useEffect(() => {
+        if (!activeEntry) return;
+
+        const updateElapsed = () => {
+            setActiveElapsedMinutes(
+                getElapsedMinutesFromTime(activeEntry.start_time)
+            );
+        };
+
+        const initialUpdate = window.setTimeout(updateElapsed, 0);
+        const interval = window.setInterval(updateElapsed, 1000);
+
+        return () => {
+            window.clearTimeout(initialUpdate);
+            window.clearInterval(interval);
+        };
+    }, [activeEntry]);
 
     function resetForm() {
         setEditingEntry(null);
@@ -346,6 +374,86 @@ export default function TimesheetDetailPage() {
         };
     }
 
+    async function handleClockIn() {
+        if (!canEdit) {
+            toast.error("You cannot edit this timesheet.");
+            return;
+        }
+
+        if (!liveCategory.trim()) {
+            toast.error("Please enter a category.");
+            return;
+        }
+
+        setClockSaving(true);
+
+        try {
+            const res = await fetch(`/api/timesheets/${timesheetId}/clock`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        category: liveCategory.trim(),
+                        description: liveDescription.trim() || null,
+                    }),
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || "Failed to clcok in.");
+
+            setEntries((current) => [
+                ...current,
+                data.entry as TimeEntry,
+            ]);
+
+            setLiveCategory("");
+            setLiveDescription("");
+            setActiveElapsedMinutes(0);
+
+            toast.success("Clocked in!");
+        } catch (err) {
+            console.error("handleClockIn error:", err);
+            toast.error(err instanceof Error ? err.message : "Could not clock in. Please try again later.");
+        } finally {
+            setClockSaving(false);
+        }
+    }
+
+    async function handleClockOut() {
+        if (!activeEntry) return;
+
+        setClockSaving(true);
+
+        try {
+            const res = await fetch(`/api/timesheets/${timesheetId}/clock`,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        entry_id: activeEntry.id,
+                    }),
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || "Failed to clock out.");
+
+            const savedEntry = data.entry as TimeEntry;
+
+            setEntries((current) => current.map((entry) => entry.id === savedEntry.id ? savedEntry : entry));
+
+            toast.success("Clocked out!");
+        } catch (err) {
+            console.error("handleClockOut error:", err);
+            toast.error(err instanceof Error ? err.message : "Could not clock out. Please try again later.");
+        } finally {
+            setClockSaving(false);
+        }
+    }
+
     async function handleSave() {
         if (!canEdit) {
             toast.error("You cannot edit this timesheet.");
@@ -411,6 +519,11 @@ export default function TimesheetDetailPage() {
 
     async function handleStatusChange(nextStatus: "open" | "finalized") {
         if (!timesheet) return;
+
+        if (nextStatus === "finalized" && activeEntry) {
+            toast.error("Clock out before finalizing this timesheet.");
+            return;
+        }
 
         setSaving(true);
 
@@ -605,7 +718,7 @@ export default function TimesheetDetailPage() {
                                     type="button"
                                     className={global.buttonBrand}
                                     onClick={() => handleStatusChange("finalized")}
-                                    disabled={saving || editingTimesheet}
+                                    disabled={saving || editingTimesheet || Boolean(activeEntry)}
                                 >
                                     {saving ? "Finalizing..." : "Finalize Timesheet"}
                                 </button>
@@ -829,6 +942,116 @@ export default function TimesheetDetailPage() {
                     <section className={styles.section}>
                         <div className={styles.sectionHeader}>
                             <h2 className={global.headLeft}>
+                                Live Time Tracking
+                            </h2>
+
+                            <p>
+                                Clock in now & clock out when you finish!
+                            </p>
+                        </div>
+
+                        {activeEntry ? (
+                            <>
+                                <div className={global.buttonGroup}>
+                                    <button
+                                        type="button"
+                                        className={global.buttonBrand}
+                                        onClick={handleClockOut}
+                                        disabled={clockSaving}
+                                    >
+                                        {clockSaving ? "Clocking out..." : "Clock Out"}
+                                    </button>
+                                </div>
+
+                                <div className={styles.statsGrid}>
+                                    <div className={styles.statCard}>
+                                        <p className={styles.statLabel}>
+                                            Clocked In
+                                        </p>
+
+                                        <p className={styles.statValue}>
+                                            {getTimeOnly(activeEntry.start_time)}
+                                        </p>
+                                    </div>
+
+                                    <div className={styles.statCard}>
+                                        <p className={styles.statLabel}>
+                                            Elapsed
+                                        </p>
+
+                                        <p className={styles.statValue}>
+                                            {formatHoursFromMinutes(activeElapsedMinutes)}
+                                        </p>
+                                    </div>
+
+                                    <div className={styles.statCard}>
+                                        <p className={styles.statLabel}>
+                                            Category
+                                        </p>
+
+                                        <p className={styles.statValue}>
+                                            {activeEntry.category}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {activeEntry.description && (
+                                    <div style={{ marginTop: "18px" }}>
+                                        <span className={styles.historyLabel}>Description</span>
+                                        <span className={styles.historySubValue}>
+                                            {activeEntry.description}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <div className={styles.quickEntryGrid}>
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Category</label>
+
+                                        <input
+                                            type="text"
+                                            className={global.input}
+                                            value={liveCategory}
+                                            onChange={(e) => setLiveCategory(e.target.value)}
+                                            placeholder="Admin, project, scouting, etc."
+                                            disabled={clockSaving}
+                                        />
+                                    </div>
+
+                                    <div className={`${styles.field} ${styles.fullWidth}`}>
+                                        <label className={global.label}>Description</label>
+
+                                        <textarea
+                                            className={global.textarea}
+                                            value={liveDescription}
+                                            onChange={(e) => setLiveDescription(e.target.value)}
+                                            placeholder="optional"
+                                            disabled={clockSaving}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={global.buttonBrand}
+                                        onClick={handleClockIn}
+                                        disabled={clockSaving}
+                                    >
+                                        {clockSaving ? "Clocking in..." : "Clock In"}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </section>
+                )}
+
+                {canEdit && (
+                    <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2 className={global.headLeft}>
                                 {editingEntry ? "Edit Time Entry" : "Add Time Entry"}
                             </h2>
 
@@ -956,14 +1179,14 @@ export default function TimesheetDetailPage() {
                                             <span className={styles.historyLabel}>Time</span>
                                             <span className={styles.historyValue}>
                                                 {getTimeOnly(entry.start_time)} →{" "}
-                                                {getTimeOnly(entry.end_time)}
+                                                {entry.end_time ? getTimeOnly(entry.end_time) : "TBD"}
                                             </span>
                                         </div>
 
                                         <div>
                                             <span className={styles.historyLabel}>Hours</span>
                                             <span className={styles.historyValue}>
-                                                {formatHoursFromMinutes(entry.duration_minutes)}
+                                                {entry.end_time ? formatHoursFromMinutes(entry.duration_minutes) : formatHoursFromMinutes(activeElapsedMinutes)}
                                             </span>
                                         </div>
 
@@ -987,7 +1210,8 @@ export default function TimesheetDetailPage() {
                                                 type="button"
                                                 className={global.iconButton}
                                                 onClick={() => handleEdit(entry)}
-                                                title="Edit time entry"
+                                                disabled={!entry.end_time}
+                                                title={entry.end_time ? "Edit time entry" : "Clock out before editing"}
                                             >
                                                 <Pencil size={18} />
                                             </button>
@@ -1040,7 +1264,7 @@ export default function TimesheetDetailPage() {
 
                                 <p className={global.labelLine}>
                                     <strong>Hours:</strong>{" "}
-                                    {formatHoursFromMinutes(pendingDeleteEntry.duration_minutes)}
+                                    {pendingDeleteEntry.end_time ? formatHoursFromMinutes(pendingDeleteEntry.duration_minutes) : "Currently clocked in"}
                                 </p>
 
                                 <p className={global.labelLine}>

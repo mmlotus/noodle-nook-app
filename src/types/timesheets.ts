@@ -80,7 +80,7 @@ export type TimeEntry = {
     work_date: string;
     start_time: string | null;
     end_time: string | null;
-    duration_minutes: string | number;
+    duration_minutes: string | number | null;
     category: string;
     description: string | null;
     created_at: string;
@@ -123,4 +123,13 @@ export type SharedTimesheetSummary = {
     shared_at: string;
     total_minutes: string | number;
     entry_count: string | number;
+};
+
+export type LiveClockInPayload = {
+    category: string;
+    description?: string | null;
+};
+
+export type LiveClockOutPayload = {
+    entry_id: string;
 };

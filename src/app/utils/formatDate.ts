@@ -14,6 +14,49 @@ export function getTodayDateString(): string {
     return `${year}-${month}-${day}`;
 }
 
+export function getCurrentTimeString(): string {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+export function getElapsedMinutesFromTime(
+    startTime: string | null | undefined
+): number {
+    if (!startTime) return 0;
+
+    const [startHours, startMinutes, startSeconds = 0] = startTime
+        .split(":")
+        .map(Number);
+
+    if (
+        !Number.isFinite(startHours) ||
+        !Number.isFinite(startMinutes) ||
+        !Number.isFinite(startSeconds)
+    ) {
+        return 0;
+    }
+
+    const now = new Date();
+
+    const start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        startHours,
+        startMinutes,
+        startSeconds
+    );
+
+    return Math.max(
+        0,
+        Math.floor((now.getTime() - start.getTime()) / 60000)
+    );
+}
+
 export function getCurrentMonthValue() {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
