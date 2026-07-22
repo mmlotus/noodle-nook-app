@@ -1,4 +1,4 @@
-import { getCurrentTimeString, getMinutesBetweenTimes, getTodayDateString } from "@/app/utils/formatDate";
+import { getMinutesBetweenTimes } from "@/app/utils/formatDate";
 import { jsonError, jsonOk, serverError } from "@/lib/api/apiUtils";
 import { withUser } from "@/lib/api/withUser";
 import db from "@/lib/db";
@@ -46,8 +46,16 @@ export const POST = withUser<Params>(async (req, context, user) => {
 
         if (timesheet.status !== "open") return jsonError("Only open timesheets can be edited.", 400);
 
-        const workDate = getTodayDateString();
-        const startTime = getCurrentTimeString();
+        if (!body.work_date || typeof body.work_date !== "string") {
+            return jsonError("Work date is required.", 400);
+        }
+
+        if (!body.start_time || typeof body.start_time !== "string") {
+            return jsonError("Clock-in time is required.", 400);
+        }
+
+        const workDate = body.work_date;
+        const startTime = body.start_time;
 
         if (workDate < timesheet.period_start || workDate > timesheet.period_end) {
             return jsonError("Today's date is outside this timesheet period.", 400);
@@ -163,7 +171,11 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
 
         if (activeResult.length === 0) return jsonError("Active time entry not found.", 404);
 
-        const endTime = getCurrentTimeString();
+        if (!body.end_time || typeof body.end_time !== "string") {
+            return jsonError("Clock-out time is required.", 400);
+        }
+
+        const endTime = body.end_time;
 
         const durationMinutes = getMinutesBetweenTimes(activeResult[0].start_time, endTime);
 

@@ -126,10 +126,13 @@ export type SharedTimesheetSummary = {
 };
 
 export type LiveClockInPayload = {
+    work_date: string;
+    start_time: string;
     category: string;
     description?: string | null;
 };
 
 export type LiveClockOutPayload = {
     entry_id: string;
+    end_time: string;
 };

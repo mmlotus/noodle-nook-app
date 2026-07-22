@@ -16,6 +16,7 @@ import {
 import {
     formatDate,
     formatHoursFromMinutes,
+    getCurrentTimeString,
     getDateOnly,
     getElapsedMinutesFromTime,
     getMinutesBetweenTimes,
@@ -393,6 +394,8 @@ export default function TimesheetDetailPage() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
+                        work_date: getTodayDateString(),
+                        start_time: getCurrentTimeString(),
                         category: liveCategory.trim(),
                         description: liveDescription.trim() || null,
                     }),
@@ -433,6 +436,7 @@ export default function TimesheetDetailPage() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         entry_id: activeEntry.id,
+                        end_time: getCurrentTimeString(),
                     }),
                 }
             );
