@@ -73,7 +73,7 @@ export default function ThemeApplier() {
 
         if (isLoading) return;
 
-        if (isAuthenticated) {
+        if (!isAuthenticated) {
             applyTheme("system");
             return;
         }
