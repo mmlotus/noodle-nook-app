@@ -2,7 +2,7 @@ export const FEDERAL_MILEAGE_RATES: Record<number, number> = {
     2023: 0.655,
     2024: 0.67,
     2025: 0.7,
-    2026: 0.725,
+    2026: 0.76,
 };
 
 export const DEFAULT_MILEAGE_REIMB_RATE = FEDERAL_MILEAGE_RATES[2026];
