@@ -157,6 +157,21 @@ function LoginContent() {
         if (mode === "register") {
             setRegisterAttempted(true);
 
+            if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+                setError("Please fill out all fields.");
+                return;
+            }
+
+            if (!passwordValidation.isValid) {
+                setError(passwordValidation.errors[0] || "Please enter a valid password.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                setError("Passwords do not match.");
+                return;
+            }
+
             if (!allSecurityQuestionsComplete) {
                 setError("Please complete all three security questions.");
                 return;
@@ -388,17 +403,7 @@ function LoginContent() {
                     <button
                         type="submit"
                         className={global.buttonBrand}
-                        disabled={
-                            loading ||
-                            !email ||
-                            !password ||
-                            (mode === "register" &&
-                                (!name ||
-                                    !confirmPassword ||
-                                    !passwordValidation.isValid ||
-                                    passwordsDoNotMatch
-                                ))
-                        }
+                        disabled={loading}
                     >
                         {submitText}
                     </button>
