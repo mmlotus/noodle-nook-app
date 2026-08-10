@@ -41,11 +41,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${quicksand.variable} appBody`}>
-        <ThemeApplier />
         <PWARegister />
         <Toaster position="top-center" />
 
         <NextAuthSessionProvider>
+          <ThemeApplier />
+          
           <div className="page-wrapper">
             <ToolTipProvider>
               <Navbar />

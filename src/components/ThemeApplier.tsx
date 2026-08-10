@@ -1,10 +1,13 @@
 "use client";
 
+import { useCurrentUser } from "@/lib/useCurrentUser";
 import { useEffect } from "react";
 
 type ThemePref = "system" | "light" | "dark";
 
 export default function ThemeApplier() {
+    const { isAuthenticated, isLoading } = useCurrentUser();
+
     useEffect(() => {
         const root = document.documentElement;
         const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -68,6 +71,13 @@ export default function ThemeApplier() {
             loadThemeFromProfile();
         };
 
+        if (isLoading) return;
+
+        if (isAuthenticated) {
+            applyTheme("system");
+            return;
+        }
+
         loadThemeFromProfile();
         window.addEventListener("theme-preference-updated", handleThemeRefresh);
 
@@ -75,7 +85,7 @@ export default function ThemeApplier() {
             cleanUpSystemListener();
             window.removeEventListener("theme-preference-updated", handleThemeRefresh);
         };
-    }, []);
+    }, [isAuthenticated, isLoading]);
 
     return null;
 }
