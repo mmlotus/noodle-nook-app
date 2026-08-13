@@ -10,6 +10,7 @@ import { useToolTips } from "@/components/ToolTips/ToolTipProvider";
 import { useCurrentUser } from "@/lib/useCurrentUser";
 import Link from "next/link";
 import { disablePushNotifications, enablePushNotifications, getPushDeviceStatus, PushDeviceStatus } from "@/lib/push/pushNotifications";
+import AllocationSettings from "@/components/AllocationPlanner/AllocationSettings";
 
 export default function ProfileMain() {
     const { user, isAuthenticated, isLoading, update } = useCurrentUser();
@@ -280,6 +281,8 @@ export default function ProfileMain() {
                     <p className={global.smallText}>To change your theme preferences, edit your profile!</p>
                 </div>
             </div>
+
+            <AllocationSettings />
         </div>
     )
 }

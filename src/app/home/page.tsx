@@ -144,6 +144,10 @@ export default function HomePage() {
                     <h2>Shared Timesheets</h2>
                     <p>View timesheets shared with you & manage timesheets you have shared.</p>
                 </Link>
+                <Link href="/allocation" className={global.card}>
+                    <h2>Allocation Planner</h2>
+                    <p>Create reusable plans to split money between accounts & see exactly how much should move where.</p>
+                </Link>
             </div>
 
             <div className={global.fullWidthSeparator} />
