@@ -188,16 +188,27 @@ export default function TimesheetsPage() {
                                             </div>
 
                                             {timesheet.is_payable && (
-                                                <div>
-                                                    <span className={styles.historyLabel}>Estimated Pay</span>
-                                                    <span className={styles.historyValue}>
-                                                        ${getEstimatedPay(timesheet).toFixed(2)}
-                                                    </span>
+                                                <>
+                                                    <div>
+                                                        <span className={styles.historyLabel}>Estimated Pay</span>
+                                                        <span className={styles.historyValue}>
+                                                            ${getEstimatedPay(timesheet).toFixed(2)}
+                                                        </span>
 
-                                                    <span className={styles.historySubValue}>
-                                                        ${Number(timesheet.hourly_rate || 0).toFixed(2)}/hr
-                                                    </span>
-                                                </div>
+                                                        <span className={styles.historySubValue}>
+                                                            ${Number(timesheet.hourly_rate || 0).toFixed(2)}/hr
+                                                        </span>
+                                                    </div>
+
+                                                    <div className={styles.paymentStampWrapper}>
+                                                        <div
+                                                            className={`${styles.paymentStamp} ${timesheet.is_paid ? styles.paymentStampPaid : styles.paymentStampUnpaid
+                                                                }`}
+                                                        >
+                                                            {timesheet.is_paid ? "PAID" : "UNPAID"}
+                                                        </div>
+                                                    </div>
+                                                </>
                                             )}
 
                                             <div>

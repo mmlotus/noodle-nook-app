@@ -287,3 +287,35 @@
         width: 100%;
     }
 }
+
+.paymentStampWrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0.1rem 0.5rem;
+}
+
+.paymentStamp {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border: 2px solid;
+    border-radius: 6px;
+
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.paymentStampUnpaid {
+    color: #c62828;
+    border-color: #c62828;
+    background: rgba(198, 40, 40, 0.08);
+}
+
+.paymentStampPaid {
+    color: #238b78;
+    border-color: #238b78;
+    background: rgba(35, 139, 120, 0.1);
+}
