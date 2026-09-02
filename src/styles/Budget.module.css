@@ -716,6 +716,85 @@
     .generateMonthGrid {
         grid-template-columns: 1fr;
     }
+
+    .calendarShell {
+        width: 100%;
+        overflow: visible;
+        padding-bottom: 0;
+        cursor: auto;
+        touch-action: auto;
+        user-select: auto;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .calendarWeekdays,
+    .calendarGrid {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 3px;
+    }
+
+    .calendarWeekdays {
+        margin-bottom: 3px;
+    }
+
+    .calendarWeekdays span {
+        min-width: 0;
+        font-size: 0.7rem;
+    }
+
+    .calendarDay {
+        min-width: 0;
+        min-height: 90px;
+        padding: 4px;
+        gap: 4px;
+        border-radius: 7px;
+    }
+
+    .calendarDayNumber {
+        font-size: 0.75rem;
+    }
+
+    .calendarDayTop {
+        gap: 2px;
+    }
+
+    .calendarEvents {
+        min-width: 0;
+        gap: 3px;
+    }
+
+    .calendarEventPending,
+    .calendarEventCompleted,
+    .calendarEventSkipped {
+        min-width: 0;
+        padding: 4px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .calendarEventPending span,
+    .calendarEventCompleted span,
+    .calendarEventSkipped span {
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.65rem;
+    }
+
+    .calendarEventPending strong,
+    .calendarEventCompleted strong,
+    .calendarEventSkipped strong {
+        font-size: 0.62rem;
+    }
+
+    .calendarAddButton {
+        transform: scale(0.7);
+    }
 }
 
 @media (max-width: 520px) {
