@@ -25,12 +25,15 @@ import {
 } from "@/app/utils/formatDate";
 import { Pencil, Share2, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function TimesheetDetailPage() {
     const params = useParams();
     const router = useRouter();
+
+    const timesheetEditRef = useRef<HTMLDivElement | null>(null);
+    const timeclockEditRef = useRef<HTMLDivElement | null>(null);
 
     const timesheetId = String(params.id || "");
 
@@ -205,6 +208,13 @@ export default function TimesheetDetailPage() {
                 : String(timesheet.hourly_rate)
         );
         setEditingTimesheet(true);
+
+        requestAnimationFrame(() => {
+            timesheetEditRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        });
     }
 
     function cancelTimesheetEdit() {
@@ -518,7 +528,12 @@ export default function TimesheetDetailPage() {
         setCategory(entry.category);
         setDescription(entry.description || "");
 
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        requestAnimationFrame(() => {
+            timeclockEditRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        });
     }
 
     async function handleStatusChange(nextStatus: "open" | "finalized") {
@@ -794,7 +809,7 @@ export default function TimesheetDetailPage() {
                 </section>
 
                 {editingTimesheet && (
-                    <section className={styles.section}>
+                    <section ref={timesheetEditRef} className={styles.section}>
                         <div className={styles.sectionHeader}>
                             <h2 className={global.headLeft}>Edit Timesheet</h2>
                             <p>Update notes, whether this timesheet is payable, and the hourly rate.</p>
@@ -1053,7 +1068,7 @@ export default function TimesheetDetailPage() {
                 )}
 
                 {canEdit && (
-                    <section className={styles.section}>
+                    <section ref={timeclockEditRef} className={styles.section}>
                         <div className={styles.sectionHeader}>
                             <h2 className={global.headLeft}>
                                 {editingEntry ? "Edit Time Entry" : "Add Time Entry"}
