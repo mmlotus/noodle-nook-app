@@ -976,29 +976,72 @@
 
 
 .passwordField {
-    position: relative;
-    width: 100%;
+  position: relative;
+  width: 100%;
 }
 
 .passwordInput {
-    padding-right: 42px;
+  padding-right: 42px;
 }
 
 .passwordToggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 .passwordToggle:hover {
-    color: var(--text);
+  color: var(--text);
+}
+
+.homeSections {
+  width: 100%;
+}
+
+.homeSection {
+  width: 100%;
+  margin: 0;
+  padding: 2rem 0;
+
+  background: var(--bg);
+
+  /* replaces the original separator line */
+  border-top: 1px solid var(--border);
+}
+
+.homeSection:nth-child(even) {
+  background: var(--bg-alt);
+}
+
+.homeSectionToggle {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.homeSectionChevron {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 4px;
 }

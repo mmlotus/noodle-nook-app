@@ -15,7 +15,8 @@ export const GET = withUser(async (_req, _context, user) => {
                 subtitle_choice,
                 theme_preference,
                 preferred_weight_unit,
-                push_notifications_enabled
+                push_notifications_enabled,
+                collapsed_home_sections
             FROM users
             WHERE id = $1
             `,
