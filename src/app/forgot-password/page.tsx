@@ -3,7 +3,7 @@
 import toast from "react-hot-toast";
 import { validatePassword } from "@/lib/passwordRules";
 import global from "@/styles/Global.module.css";
-import { Check, CircleAlert } from "lucide-react";
+import { Check, CircleAlert, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,8 @@ export default function ForgotPasswordPage() {
     const [answers, setAnswers] = useState(["", "", ""]);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -63,6 +65,8 @@ export default function ForgotPasswordPage() {
         setAnswers(["", "", ""]);
         setPassword("");
         setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setError("");
         setSuccess("");
         setAttempted(false);
@@ -265,16 +269,27 @@ export default function ForgotPasswordPage() {
 
                         <p className={global.formSectionTitle}>New Password</p>
                         <label className={global.label}>New Password</label>
+                        <div className={global.passwordField}>
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                className={`${global.input} ${passwordMissing() ? global.inputError : ""}`}
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
+                                autoComplete="new-password"
+                                required
+                            />
 
-                        <input
-                            id="password"
-                            type="password"
-                            className={`${global.input} ${passwordMissing() ? global.inputError : ""}`}
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
-                            autoComplete="new-password"
-                            required
-                        />
+                            <button
+                                type="button"
+                                className={global.passwordToggle}
+                                onClick={() => setShowPassword((current) => !current)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                title={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
 
                         <div className={global.passwordRulesBox}>
                             <p className={global.passwordRulesTitle}>Your password must contain:</p>
@@ -329,18 +344,30 @@ export default function ForgotPasswordPage() {
                         </div>
 
                         <label className={global.label}>Confirm Password</label>
-                        <input
-                            id="confirmPassword"
-                            type="password"
-                            className={`${global.input} ${confirmPasswordMissing() || passwordsDoNotMatch
-                                ? global.inputError
-                                : ""
-                                }`}
-                            value={confirmPassword}
-                            onChange={(event) => setConfirmPassword(event.target.value)}
-                            autoComplete="new-password"
-                            required
-                        />
+                        <div className={global.passwordField}>
+                            <input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                className={`${global.input} ${confirmPasswordMissing() || passwordsDoNotMatch
+                                    ? global.inputError
+                                    : ""
+                                    }`}
+                                value={confirmPassword}
+                                onChange={(event) => setConfirmPassword(event.target.value)}
+                                autoComplete="new-password"
+                                required
+                            />
+
+                            <button
+                                type="button"
+                                className={global.passwordToggle}
+                                onClick={() => setShowConfirmPassword((current) => !current)}
+                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                title={showConfirmPassword ? "Hide password" : "Show password"}
+                            >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
 
                         {passwordsDoNotMatch && (
                             <p

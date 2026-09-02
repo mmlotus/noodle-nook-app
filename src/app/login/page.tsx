@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { validatePassword } from "@/lib/passwordRules";
-import { Check, CircleAlert } from "lucide-react";
+import { Check, CircleAlert, Eye, EyeOff } from "lucide-react";
 import { SECURITY_QUESTIONS } from "@/lib/securityQuestions";
 import Link from "next/link";
 import Image from "next/image";
@@ -24,6 +24,8 @@ function LoginContent() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [securityQuestions, setSecurityQuestions] = useState([
         { question: "", answer: "" },
@@ -92,6 +94,8 @@ function LoginContent() {
         setError("");
         setPassword("");
         setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setRegisterAttempted(false);
     }
 
@@ -267,28 +271,52 @@ function LoginContent() {
                     />
 
                     <label className={global.label}>Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        className={global.input}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        autoComplete={mode === "login" ? "current-password" : "new-password"}
-                        required
-                    />
+                    <div className={global.passwordField}>
+                        <input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            className={global.input}
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            autoComplete={mode === "login" ? "current-password" : "new-password"}
+                            required
+                        />
+
+                        <button
+                            type="button"
+                            className={global.passwordToggle}
+                            onClick={() => setShowPassword((current) => !current)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            title={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
 
                     {mode === "register" && (
                         <>
                             <label className={global.label}>Confirm Password</label>
-                            <input
-                                id="confirmPassword"
-                                type="password"
-                                className={global.input}
-                                value={confirmPassword}
-                                onChange={(event) => setConfirmPassword(event.target.value)}
-                                autoComplete="new-password"
-                                required
-                            />
+                            <div className={global.passwordField}>
+                                <input
+                                    id="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    className={global.input}
+                                    value={confirmPassword}
+                                    onChange={(event) => setConfirmPassword(event.target.value)}
+                                    autoComplete="new-password"
+                                    required
+                                />
+
+                                <button
+                                    type="button"
+                                    className={global.passwordToggle}
+                                    onClick={() => setShowConfirmPassword((current) => !current)}
+                                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                    title={showConfirmPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
 
                             {passwordsDoNotMatch && (
                                 <p
