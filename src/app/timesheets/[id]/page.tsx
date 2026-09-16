@@ -109,6 +109,8 @@ export default function TimesheetDetailPage() {
         return hours * Number(timesheet.hourly_rate);
     }, [stats.totalMinutes, timesheet]);
 
+    const zohoHours = (stats.totalMinutes / 60).toFixed(4);
+
     const loadTimesheet = useCallback(async () => {
         try {
             const res = await fetch(`/api/timesheets/${timesheetId}`);
@@ -947,12 +949,20 @@ export default function TimesheetDetailPage() {
                         </div>
 
                         {timesheet.is_payable && (
-                            <div className={styles.statCard}>
-                                <p className={styles.statLabel}>Estimated Pay</p>
-                                <p className={styles.statValue}>
-                                    ${estimatedPay.toFixed(2)}
-                                </p>
-                            </div>
+                            <>
+                                <div className={styles.statCard}>
+                                    <p className={styles.statLabel}>Raw Hours (Invoice)</p>
+                                    <p className={styles.statValue}>
+                                        {zohoHours}
+                                    </p>
+                                </div>
+                                <div className={styles.statCard}>
+                                    <p className={styles.statLabel}>Estimated Pay</p>
+                                    <p className={styles.statValue}>
+                                        ${estimatedPay.toFixed(2)}
+                                    </p>
+                                </div>
+                            </>
                         )}
                     </div>
                 </section>
