@@ -25,7 +25,7 @@ export type TimeEntryCreatePayload = {
     start_time: string;
     end_time: string;
     duration_minutes: number;
-    category: string;
+    category?: string;
     description?: string | null;
 };
 

@@ -122,12 +122,17 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
             return jsonError("Timesheet not found.", 404);
         }
 
-        if (existingResult[0].is_paid) {
-            return jsonError("Paid timesheets cannot be edited.", 400);
-        }
-
         const body = (await req.json()) as TimesheetUpdatePayload;
         const validated = validateTimesheetUpdatePayload(body);
+
+        if (existingResult[0].is_paid) {
+            const isUnpayOnly =
+                validated.hasIsPaid &&
+                validated.isPaid === false &&
+                Object.keys(body).every((key) => key === "is_paid");
+
+            if (!isUnpayOnly) return jsonError("Paid timesheets cannot be edited.", 400);
+        }
 
         const notesWasProvided = Object.prototype.hasOwnProperty.call(body, "notes");
 

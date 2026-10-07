@@ -21,10 +21,8 @@ export const POST = withUser<Params>(async (req, context, user) => {
 
         const body = (await req.json()) as LiveClockInPayload;
 
-        const category = body.category?.trim();
+        const category = body.category?.trim() || "";
         const description = body.description?.trim() || null;
-
-        if (!category) return jsonError("Category is required.", 400);
 
         const timesheetResult = await db.query(
             `

@@ -357,11 +357,6 @@ export default function TimesheetDetailPage() {
             return false;
         }
 
-        if (!category.trim()) {
-            toast.error("Please enter a category.");
-            return false;
-        }
-
         return true;
     }
 
@@ -390,11 +385,6 @@ export default function TimesheetDetailPage() {
     async function handleClockIn() {
         if (!canEdit) {
             toast.error("You cannot edit this timesheet.");
-            return;
-        }
-
-        if (!liveCategory.trim()) {
-            toast.error("Please enter a category.");
             return;
         }
 
@@ -1019,7 +1009,7 @@ export default function TimesheetDetailPage() {
                                         </p>
 
                                         <p className={styles.statValue}>
-                                            {activeEntry.category}
+                                            {activeEntry.category || "-"}
                                         </p>
                                     </div>
                                 </div>
@@ -1044,7 +1034,7 @@ export default function TimesheetDetailPage() {
                                             className={global.input}
                                             value={liveCategory}
                                             onChange={(e) => setLiveCategory(e.target.value)}
-                                            placeholder="Admin, project, scouting, etc."
+                                            placeholder="Admin, project, scouting, etc. (optional)"
                                             disabled={clockSaving}
                                         />
                                     </div>
@@ -1135,7 +1125,7 @@ export default function TimesheetDetailPage() {
                                     className={global.input}
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    placeholder="Admin, project, scouting, etc."
+                                    placeholder="Admin, project, scouting, etc. (optional)"
                                 />
                             </div>
 
@@ -1222,7 +1212,7 @@ export default function TimesheetDetailPage() {
                                         <div>
                                             <span className={styles.historyLabel}>Category</span>
                                             <span className={styles.historyValue}>
-                                                {entry.category}
+                                                {entry.category || "-"}
                                             </span>
 
                                             {entry.description && (

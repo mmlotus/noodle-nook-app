@@ -126,11 +126,7 @@ export function validateTimeEntryCreatePayload(body: TimeEntryCreatePayload) {
         throw new Error("Duration must be greater than zero.");
     }
 
-    const category = cleanString(body.category);
-
-    if (!category) {
-        throw new Error("Category is required.");
-    }
+    const category = cleanString(body.category) || "";
 
     return {
         workDate: body.work_date,
@@ -153,24 +149,13 @@ export function validateTimeEntryUpdatePayload(body: TimeEntryUpdatePayload) {
         throw new Error("Duration must be greater than zero.");
     }
 
-    if (
-        body.category !== undefined &&
-        (!body.category || typeof body.category !== "string")
-    ) {
-        throw new Error("Category is required.");
-    }
-
     if (body.start_time && body.end_time && body.end_time <= body.start_time) {
         throw new Error("Clock-out time must be after clock-in time.");
     }
 
     const category = body.category === undefined
         ? undefined
-        : cleanString(body.category);
-
-    if (body.category !== undefined && !category) {
-        throw new Error("Category is required.");
-    }
+        : cleanString(body.category) || "";
 
     return {
         workDate: body.work_date,
