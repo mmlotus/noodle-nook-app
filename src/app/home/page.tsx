@@ -12,6 +12,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+const UPDATE_CUTOFF = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
 export default function HomePage() {
     const { user } = useCurrentUser();
 
@@ -68,7 +70,9 @@ export default function HomePage() {
 
     const name = user.name ? user.name.split(" ")[0] : "";
 
-    const hasUpdates = systemUpdates.length > 0;
+    const hasUpdates = systemUpdates.some(
+        (update) => new Date(update.date).getTime() >= UPDATE_CUTOFF
+    );
 
     if (!homePreferencesLoaded) {
         return (
