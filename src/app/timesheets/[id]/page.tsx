@@ -804,7 +804,7 @@ export default function TimesheetDetailPage() {
 
                                     <div className={styles.statCard}>
                                         <p className={styles.statLabel}>
-                                            Category
+                                            Reference
                                         </p>
 
                                         <p className={styles.statValue}>
@@ -826,14 +826,14 @@ export default function TimesheetDetailPage() {
                             <>
                                 <div className={styles.quickEntryGrid}>
                                     <div className={styles.field}>
-                                        <label className={global.label}>Category</label>
+                                        <label className={global.label}>Reference</label>
 
                                         <input
                                             type="text"
                                             className={global.input}
                                             value={liveCategory}
                                             onChange={(e) => setLiveCategory(e.target.value)}
-                                            placeholder="Admin, project, scouting, etc. (optional)"
+                                            placeholder="Admin, job site, scouting, etc. (optional)"
                                             disabled={clockSaving}
                                         />
                                     </div>
@@ -944,13 +944,13 @@ export default function TimesheetDetailPage() {
                                     </div>
 
                                     <div className={styles.field}>
-                                        <label className={global.label}>Category</label>
+                                        <label className={global.label}>Reference</label>
                                         <input
                                             type="text"
                                             className={global.input}
                                             value={category}
                                             onChange={(e) => setCategory(e.target.value)}
-                                            placeholder="Admin, project, scouting, etc. (optional)"
+                                            placeholder="Admin, job site, scouting, etc. (optional)"
                                         />
                                     </div>
 
@@ -1344,7 +1344,7 @@ export default function TimesheetDetailPage() {
                                                 </div>
 
                                                 <div className={styles.entryCategory}>
-                                                    <span className={styles.historyLabel}>Category</span>
+                                                    <span className={styles.historyLabel}>Reference</span>
                                                     <span className={styles.historyValue}>
                                                         {entry.category || "-"}
                                                     </span>
@@ -1450,7 +1450,7 @@ export default function TimesheetDetailPage() {
                                 </p>
 
                                 <p className={global.labelLine}>
-                                    <strong>Category:</strong> {pendingDeleteEntry.category}
+                                    <strong>Reference:</strong> {pendingDeleteEntry.category}
                                 </p>
                             </div>
                         </div>

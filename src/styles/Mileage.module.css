@@ -422,6 +422,15 @@
         width: 100%;
     }
 
+    .historyHeaderRow .actions {
+        width: 100%;
+        flex-shrink: 1;
+    }
+
+    .historyHeaderRow .actions button {
+        width: 100%;
+    }
+
     .entrySummary {
         padding: 14px;
     }
