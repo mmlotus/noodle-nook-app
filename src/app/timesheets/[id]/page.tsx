@@ -23,10 +23,11 @@ import {
     getTimeOnly,
     getTodayDateString,
 } from "@/app/utils/formatDate";
-import { CarFront, Pencil, Share2, Trash } from "lucide-react";
+import { CarFront, ChevronDown, ChevronUp, Pencil, Share2, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import Pagination from "@/components/Pagination";
 
 export default function TimesheetDetailPage() {
     const params = useParams();
@@ -41,6 +42,9 @@ export default function TimesheetDetailPage() {
     const [entries, setEntries] = useState<TimeEntry[]>([]);
     const [access, setAccess] = useState<TimesheetAccess | null>(null);
 
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(5);
+
     const [editingTimesheet, setEditingTimesheet] = useState(false);
     const [editPeriodStart, setEditPeriodStart] = useState("");
     const [editPeriodEnd, setEditPeriodEnd] = useState("");
@@ -49,7 +53,11 @@ export default function TimesheetDetailPage() {
     const [editHourlyRate, setEditHourlyRate] = useState("");
 
     const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+    const [expandedEntryIds, setExpandedEntryIds] = useState<string[]>([]);
     const [pendingDeleteEntry, setPendingDeleteEntry] = useState<TimeEntry | null>(null);
+
+    const [showTimesheetDetails, setShowTimesheetDetails] = useState(false);
+    const [showAddEntry, setShowAddEntry] = useState(false);
 
     const [workDate, setWorkDate] = useState(getTodayDateString());
     const [startTime, setStartTime] = useState("");
@@ -86,6 +94,11 @@ export default function TimesheetDetailPage() {
         });
     }, [entries]);
 
+    const paginatedEntries = useMemo(() => {
+        const startIndex = (page - 1) * perPage;
+        return sortedEntries.slice(startIndex, startIndex + perPage);
+    }, [sortedEntries, page, perPage]);
+
     const activeEntry = useMemo(() => {
         return entries.find((entry) => !entry.end_time) || null;
     }, [entries]);
@@ -111,8 +124,6 @@ export default function TimesheetDetailPage() {
         const hours = stats.totalMinutes / 60;
         return hours * Number(timesheet.hourly_rate);
     }, [stats.totalMinutes, timesheet]);
-
-    const zohoHours = (stats.totalMinutes / 60).toFixed(4);
 
     const loadTimesheet = useCallback(async () => {
         try {
@@ -183,6 +194,7 @@ export default function TimesheetDetailPage() {
 
     function resetForm() {
         setEditingEntry(null);
+        setShowAddEntry(false);
 
         if (timesheet) {
             const periodStart = getDateOnly(timesheet.period_start);
@@ -520,8 +532,17 @@ export default function TimesheetDetailPage() {
         }
     }
 
+    function toggleEntryExpanded(entryId: string) {
+        setExpandedEntryIds((current) =>
+            current.includes(entryId)
+                ? current.filter((id) => id !== entryId)
+                : [...current, entryId]
+        );
+    }
+
     function handleEdit(entry: TimeEntry) {
         setEditingEntry(entry);
+        setShowAddEntry(true);
         setWorkDate(getDateOnly(entry.work_date));
         setStartTime(getTimeOnly(entry.start_time));
         setEndTime(getTimeOnly(entry.end_time));
@@ -653,6 +674,8 @@ export default function TimesheetDetailPage() {
 
             setEntries((current) => current.filter((entry) => entry.id !== entryId));
 
+            setPage((current) => Math.min(current, Math.max(1, Math.ceil((entries.length - 1) / perPage))));
+
             if (editingEntry?.id === entryId) {
                 resetForm();
             }
@@ -690,281 +713,35 @@ export default function TimesheetDetailPage() {
             />
 
             <div className={styles.mileagePage}>
-                <section className={styles.section}>
-                    <div className={styles.historyHeaderRow}>
-                        <div>
-                            <h2 className={global.headLeft}>Timesheet Details</h2>
-
-                            <p>Owner: {timesheet.user_name || timesheet.user_email}</p>
-
-                            <p>
-                                Status: {timesheet.status}
-                                {access?.isShared && !access.isOwner ? " • Shared with you" : ""}
-                            </p>
-
-                            <p>
-                                Payable: {timesheet.is_payable ? "Yes" : "No"}
-                                {timesheet.is_payable && timesheet.hourly_rate
-                                    ? ` • $${Number(timesheet.hourly_rate).toFixed(2)}/hr`
-                                    : ""}
-                            </p>
-
-                            {timesheet.is_payable && (
-                                <p>
-                                    Paid: {timesheet.is_paid ? "Yes" : "No"}
-                                    {timesheet.paid_at
-                                        ? ` • ${formatDate(timesheet.paid_at)}`
-                                        : ""}
-                                </p>
-                            )}
-
-                            {timesheet.notes && <p>Notes: {timesheet.notes}</p>}
-                        </div>
-
-                        <div className={styles.actions}>
-                            {canEditTimesheetSettings && !editingTimesheet && (
-                                <button
-                                    type="button"
-                                    className={global.buttonSecondary}
-                                    onClick={startTimesheetEdit}
-                                    disabled={saving}
-                                >
-                                    Edit Timesheet
-                                </button>
-                            )}
-
-                            {access?.canEdit && timesheet.status === "open" && (
-                                <button
-                                    type="button"
-                                    className={global.buttonBrand}
-                                    onClick={() => handleStatusChange("finalized")}
-                                    disabled={saving || editingTimesheet || Boolean(activeEntry)}
-                                >
-                                    {saving ? "Finalizing..." : "Finalize Timesheet"}
-                                </button>
-                            )}
-
-                            {access?.canEdit &&
-                                timesheet.status === "finalized" &&
-                                !timesheet.is_paid && (
-                                    <button
-                                        type="button"
-                                        className={global.buttonSecondary}
-                                        onClick={() => handleStatusChange("open")}
-                                        disabled={saving || editingTimesheet}
-                                    >
-                                        Reopen Timesheet
-                                    </button>
-                                )}
-
-                            {access?.canEdit &&
-                                timesheet.status === "finalized" &&
-                                timesheet.is_payable &&
-                                !timesheet.is_paid && (
-                                    <button
-                                        type="button"
-                                        className={global.buttonBrand}
-                                        onClick={() => handlePaidChange(true)}
-                                        disabled={saving || editingTimesheet}
-                                    >
-                                        {saving ? "Marking Paid..." : "Mark as Paid"}
-                                    </button>
-                                )}
-
-                            {access?.canEdit &&
-                                timesheet.status === "finalized" &&
-                                timesheet.is_payable &&
-                                timesheet.is_paid && (
-                                    <button
-                                        type="button"
-                                        className={global.buttonSecondary}
-                                        onClick={() => handlePaidChange(false)}
-                                        disabled={saving || editingTimesheet}
-                                    >
-                                        Mark as Unpaid
-                                    </button>
-                                )}
-
-                            {access?.canShare && (
-                                <button
-                                    type="button"
-                                    className={global.buttonBrand}
-                                    onClick={() => router.push(`/timesheets/${timesheetId}/share`)}
-                                    disabled={saving || editingTimesheet}
-                                >
-                                    <Share2 size={16} />
-                                    Share
-                                </button>
-                            )}
-
-                            <button
-                                type="button"
-                                className={global.buttonSecondary}
-                                onClick={() => router.push("/timesheets")}
-                                disabled={saving}
-                            >
-                                Back
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                {editingTimesheet && (
-                    <section ref={timesheetEditRef} className={styles.section}>
-                        <div className={styles.sectionHeader}>
-                            <h2 className={global.headLeft}>Edit Timesheet</h2>
-                            <p>Update notes, whether this timesheet is payable, and the hourly rate.</p>
-                        </div>
-
-                        <div className={styles.quickEntryGrid}>
-                            <div className={styles.field}>
-                                <label className={global.label}>Period Start</label>
-                                <input
-                                    type="date"
-                                    className={global.input}
-                                    value={editPeriodStart}
-                                    onChange={(e) => setEditPeriodStart(e.target.value)}
-                                    disabled={saving}
-                                />
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={global.label}>Period End</label>
-                                <input
-                                    type="date"
-                                    className={global.input}
-                                    value={editPeriodEnd}
-                                    onChange={(e) => setEditPeriodEnd(e.target.value)}
-                                    disabled={saving}
-                                />
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={global.label}>Payable?</label>
-
-                                <div className={styles.methodRow}>
-                                    <button
-                                        type="button"
-                                        className={
-                                            editIsPayable
-                                                ? styles.methodButtonActive
-                                                : styles.methodButton
-                                        }
-                                        onClick={() => setEditIsPayable(true)}
-                                        disabled={saving}
-                                    >
-                                        Yes
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className={
-                                            !editIsPayable
-                                                ? styles.methodButtonActive
-                                                : styles.methodButton
-                                        }
-                                        onClick={() => {
-                                            setEditIsPayable(false);
-                                            setEditHourlyRate("");
-                                        }}
-                                        disabled={saving}
-                                    >
-                                        No
-                                    </button>
-                                </div>
-                            </div>
-
-                            {editIsPayable && (
-                                <div className={styles.field}>
-                                    <label className={global.label}>Hourly Rate</label>
-                                    <input
-                                        type="number"
-                                        className={global.input}
-                                        step="0.01"
-                                        min={0}
-                                        value={editHourlyRate}
-                                        onChange={(e) => setEditHourlyRate(e.target.value)}
-                                        placeholder="Example: 20.00"
-                                        disabled={saving}
-                                    />
-                                </div>
-                            )}
-
-                            <div className={`${styles.field} ${styles.fullWidth}`}>
-                                <label className={global.label}>Notes</label>
-                                <textarea
-                                    className={global.textarea}
-                                    value={editNotes}
-                                    onChange={(e) => setEditNotes(e.target.value)}
-                                    placeholder="optional"
-                                    disabled={saving}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles.actions}>
-                            <button
-                                type="button"
-                                className={global.buttonBrand}
-                                onClick={handleTimesheetSave}
-                                disabled={saving}
-                            >
-                                {saving ? "Saving..." : "Save Timesheet"}
-                            </button>
-
-                            <button
-                                type="button"
-                                className={global.buttonSecondary}
-                                onClick={cancelTimesheetEdit}
-                                disabled={saving}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </section>
-                )}
-
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={global.headLeft}>Timesheet Stats</h2>
+                <div className={styles.timesheetOverview}>
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Status</span>
+                        <strong className={styles.overviewValue}>
+                            {timesheet.status}
+                        </strong>
                     </div>
 
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Total Hours</p>
-                            <p className={styles.statValue}>
-                                {formatHoursFromMinutes(stats.totalMinutes)}
-                            </p>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Entries</p>
-                            <p className={styles.statValue}>{stats.entries}</p>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Status</p>
-                            <p className={styles.statValue}>{timesheet.status}</p>
-                        </div>
-
-                        {timesheet.is_payable && (
-                            <>
-                                <div className={styles.statCard}>
-                                    <p className={styles.statLabel}>Raw Hours (Invoice)</p>
-                                    <p className={styles.statValue}>
-                                        {zohoHours}
-                                    </p>
-                                </div>
-                                <div className={styles.statCard}>
-                                    <p className={styles.statLabel}>Estimated Pay</p>
-                                    <p className={styles.statValue}>
-                                        ${estimatedPay.toFixed(2)}
-                                    </p>
-                                </div>
-                            </>
-                        )}
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Total Hours</span>
+                        <strong className={styles.overviewValue}>
+                            {formatHoursFromMinutes(stats.totalMinutes)}
+                        </strong>
                     </div>
-                </section>
+
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Invoice Hours</span>
+                        <strong className={styles.overviewValue}>
+                            {(stats.totalMinutes / 60).toFixed(4)}
+                        </strong>
+                    </div>
+
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Estimated Pay</span>
+                        <strong className={styles.overviewValue}>
+                            ${estimatedPay.toFixed(2)}
+                        </strong>
+                    </div>
+                </div>
 
                 {canEdit && (
                     <section className={styles.section} style={{ position: "relative" }}>
@@ -1104,85 +881,366 @@ export default function TimesheetDetailPage() {
 
                 {canEdit && (
                     <section ref={timeclockEditRef} className={styles.section}>
-                        <div className={styles.sectionHeader}>
+                        <button
+                            type="button"
+                            className={styles.collapsibleHeader}
+                            onClick={() => setShowAddEntry((current) => !current)}
+                        >
                             <h2 className={global.headLeft}>
-                                {editingEntry ? "Edit Time Entry" : "Add Time Entry"}
+                                {editingEntry ? "Edit Time Entry" : "Manual Time Entry"}
                             </h2>
+                            {showAddEntry ? (
+                                <ChevronUp size={22} />
+                            ) : (
+                                <ChevronDown size={22} />
+                            )}
+                        </button>
 
-                            <p>Clock in and clock out for this timesheet period.</p>
+                        {showAddEntry && (
+                            <>
+                                <div className={styles.sectionHeader} style={{ marginTop: "20px" }}>
+                                    <p>Clock in and clock out for this timesheet period.</p>
+                                </div>
+
+                                <div className={styles.quickEntryGrid}>
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Work Date</label>
+                                        <input
+                                            type="date"
+                                            className={global.input}
+                                            value={workDate}
+                                            onChange={(e) => setWorkDate(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Clock In</label>
+                                        <input
+                                            type="time"
+                                            className={global.input}
+                                            value={startTime}
+                                            onChange={(e) => setStartTime(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Clock Out</label>
+                                        <input
+                                            type="time"
+                                            className={global.input}
+                                            value={endTime}
+                                            onChange={(e) => setEndTime(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Calculated Hours</label>
+                                        <input
+                                            type="text"
+                                            className={global.input}
+                                            value={formatHoursFromMinutes(calculatedMinutes)}
+                                            readOnly
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Category</label>
+                                        <input
+                                            type="text"
+                                            className={global.input}
+                                            value={category}
+                                            onChange={(e) => setCategory(e.target.value)}
+                                            placeholder="Admin, project, scouting, etc. (optional)"
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={styles.droveToggle}>
+                                            <input
+                                                type="checkbox"
+                                                checked={drove}
+                                                onChange={(e) => setDrove(e.target.checked)}
+                                            />
+                                            <CarFront size={18} />
+                                            <span>Drove</span>
+                                        </label>
+                                    </div>
+
+                                    <div className={`${styles.field} ${styles.fullWidth}`}>
+                                        <label className={global.label}>Description</label>
+                                        <textarea
+                                            className={global.textarea}
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder="optional"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={global.buttonBrand}
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                    >
+                                        {saving
+                                            ? "Saving..."
+                                            : editingEntry
+                                                ? "Update Entry"
+                                                : "Save Entry"}
+                                    </button>
+
+                                    {editingEntry && (
+                                        <button
+                                            type="button"
+                                            className={global.buttonSecondary}
+                                            onClick={resetForm}
+                                            disabled={saving}
+                                        >
+                                            Cancel Edit
+                                        </button>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </section>
+                )}
+
+                <section className={styles.section}>
+                    <button
+                        type="button"
+                        className={styles.collapsibleHeader}
+                        onClick={() => setShowTimesheetDetails((current) => !current)}
+                    >
+                        <h2 className={global.headLeft}>Timesheet Details</h2>
+                        {showTimesheetDetails ? (
+                            <ChevronUp size={22} />
+                        ) : (
+                            <ChevronDown size={22} />
+                        )}
+                    </button>
+
+                    {showTimesheetDetails && (
+                        <div className={styles.historyHeaderRow}>
+                            <div>
+                                <div className={styles.timesheetDetailsGrid}>
+                                    <div className={styles.timesheetDetailItem}>
+                                        <span className={styles.historyLabel}>Owner</span>
+                                        <span className={styles.historyValue}>
+                                            {timesheet.user_name || timesheet.user_email}
+                                        </span>
+                                    </div>
+
+                                    <div className={styles.timesheetDetailItem}>
+                                        <span className={styles.historyLabel}>Entries</span>
+                                        <span className={styles.historyValue}>
+                                            {stats.entries}
+                                        </span>
+                                    </div>
+
+                                    <div className={styles.timesheetDetailItem}>
+                                        <span className={styles.historyLabel}>Payable</span>
+                                        <span className={styles.historyValue}>
+                                            {timesheet.is_payable
+                                                ? `Yes${timesheet.hourly_rate
+                                                    ? ` • $${Number(timesheet.hourly_rate).toFixed(2)}/hr`
+                                                    : ""}`
+                                                : "No"
+                                            }
+                                        </span>
+                                    </div>
+
+                                    {timesheet.is_payable && (
+                                        <div className={styles.timesheetDetailItem}>
+                                            <span className={styles.historyLabel}>Paid</span>
+                                            <span className={styles.historyValue}>
+                                                {timesheet.is_paid ? "Yes" : "No"}
+                                                {timesheet.paid_at
+                                                    ? ` • ${formatDate(timesheet.paid_at)}`
+                                                    : ""}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {timesheet.notes && (
+                                    <div className={styles.timesheetDetailsNotes}>
+                                        <span className={styles.historyLabel}>Notes</span>
+                                        <p>{timesheet.notes}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.actions}>
+                                {canEditTimesheetSettings && !editingTimesheet && (
+                                    <button
+                                        type="button"
+                                        className={global.buttonSecondary}
+                                        onClick={startTimesheetEdit}
+                                        disabled={saving}
+                                    >
+                                        Edit Timesheet
+                                    </button>
+                                )}
+
+                                {access?.canEdit && timesheet.status === "open" && (
+                                    <button
+                                        type="button"
+                                        className={global.buttonBrand}
+                                        onClick={() => handleStatusChange("finalized")}
+                                        disabled={saving || editingTimesheet || Boolean(activeEntry)}
+                                    >
+                                        {saving ? "Finalizing..." : "Finalize Timesheet"}
+                                    </button>
+                                )}
+
+                                {access?.canEdit &&
+                                    timesheet.status === "finalized" &&
+                                    !timesheet.is_paid && (
+                                        <button
+                                            type="button"
+                                            className={global.buttonSecondary}
+                                            onClick={() => handleStatusChange("open")}
+                                            disabled={saving || editingTimesheet}
+                                        >
+                                            Reopen Timesheet
+                                        </button>
+                                    )}
+
+                                {access?.canEdit &&
+                                    timesheet.status === "finalized" &&
+                                    timesheet.is_payable &&
+                                    !timesheet.is_paid && (
+                                        <button
+                                            type="button"
+                                            className={global.buttonBrand}
+                                            onClick={() => handlePaidChange(true)}
+                                            disabled={saving || editingTimesheet}
+                                        >
+                                            {saving ? "Marking Paid..." : "Mark as Paid"}
+                                        </button>
+                                    )}
+
+                                {access?.canEdit &&
+                                    timesheet.status === "finalized" &&
+                                    timesheet.is_payable &&
+                                    timesheet.is_paid && (
+                                        <button
+                                            type="button"
+                                            className={global.buttonSecondary}
+                                            onClick={() => handlePaidChange(false)}
+                                            disabled={saving || editingTimesheet}
+                                        >
+                                            Mark as Unpaid
+                                        </button>
+                                    )}
+
+                                {access?.canShare && (
+                                    <button
+                                        type="button"
+                                        className={global.buttonBrand}
+                                        onClick={() => router.push(`/timesheets/${timesheetId}/share`)}
+                                        disabled={saving || editingTimesheet}
+                                    >
+                                        <Share2 size={16} />
+                                        Share
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {editingTimesheet && (
+                    <section ref={timesheetEditRef} className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <h2 className={global.headLeft}>Edit Timesheet</h2>
+                            <p>Update notes, whether this timesheet is payable, and the hourly rate.</p>
                         </div>
 
                         <div className={styles.quickEntryGrid}>
                             <div className={styles.field}>
-                                <label className={global.label}>Work Date</label>
+                                <label className={global.label}>Period Start</label>
                                 <input
                                     type="date"
                                     className={global.input}
-                                    value={workDate}
-                                    onChange={(e) => setWorkDate(e.target.value)}
+                                    value={editPeriodStart}
+                                    onChange={(e) => setEditPeriodStart(e.target.value)}
+                                    disabled={saving}
                                 />
                             </div>
 
                             <div className={styles.field}>
-                                <label className={global.label}>Clock In</label>
+                                <label className={global.label}>Period End</label>
                                 <input
-                                    type="time"
+                                    type="date"
                                     className={global.input}
-                                    value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
+                                    value={editPeriodEnd}
+                                    onChange={(e) => setEditPeriodEnd(e.target.value)}
+                                    disabled={saving}
                                 />
                             </div>
 
                             <div className={styles.field}>
-                                <label className={global.label}>Clock Out</label>
-                                <input
-                                    type="time"
-                                    className={global.input}
-                                    value={endTime}
-                                    onChange={(e) => setEndTime(e.target.value)}
-                                />
+                                <label className={global.label}>Payable?</label>
+
+                                <div className={styles.methodRow}>
+                                    <button
+                                        type="button"
+                                        className={
+                                            editIsPayable
+                                                ? styles.methodButtonActive
+                                                : styles.methodButton
+                                        }
+                                        onClick={() => setEditIsPayable(true)}
+                                        disabled={saving}
+                                    >
+                                        Yes
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className={
+                                            !editIsPayable
+                                                ? styles.methodButtonActive
+                                                : styles.methodButton
+                                        }
+                                        onClick={() => {
+                                            setEditIsPayable(false);
+                                            setEditHourlyRate("");
+                                        }}
+                                        disabled={saving}
+                                    >
+                                        No
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className={styles.field}>
-                                <label className={global.label}>Calculated Hours</label>
-                                <input
-                                    type="text"
-                                    className={global.input}
-                                    value={formatHoursFromMinutes(calculatedMinutes)}
-                                    readOnly
-                                />
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={global.label}>Category</label>
-                                <input
-                                    type="text"
-                                    className={global.input}
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    placeholder="Admin, project, scouting, etc. (optional)"
-                                />
-                            </div>
-
-                            <div className={styles.field}>
-                                <label className={styles.droveToggle}>
+                            {editIsPayable && (
+                                <div className={styles.field}>
+                                    <label className={global.label}>Hourly Rate</label>
                                     <input
-                                        type="checkbox"
-                                        checked={drove}
-                                        onChange={(e) => setDrove(e.target.checked)}
+                                        type="number"
+                                        className={global.input}
+                                        step="0.01"
+                                        min={0}
+                                        value={editHourlyRate}
+                                        onChange={(e) => setEditHourlyRate(e.target.value)}
+                                        placeholder="Example: 20.00"
+                                        disabled={saving}
                                     />
-                                    <CarFront size={18} />
-                                    <span>Drove</span>
-                                </label>
-                            </div>
+                                </div>
+                            )}
 
                             <div className={`${styles.field} ${styles.fullWidth}`}>
-                                <label className={global.label}>Description</label>
+                                <label className={global.label}>Notes</label>
                                 <textarea
                                     className={global.textarea}
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
+                                    value={editNotes}
+                                    onChange={(e) => setEditNotes(e.target.value)}
                                     placeholder="optional"
+                                    disabled={saving}
                                 />
                             </div>
                         </div>
@@ -1191,26 +1249,20 @@ export default function TimesheetDetailPage() {
                             <button
                                 type="button"
                                 className={global.buttonBrand}
-                                onClick={handleSave}
+                                onClick={handleTimesheetSave}
                                 disabled={saving}
                             >
-                                {saving
-                                    ? "Saving..."
-                                    : editingEntry
-                                        ? "Update Entry"
-                                        : "Save Entry"}
+                                {saving ? "Saving..." : "Save Timesheet"}
                             </button>
 
-                            {editingEntry && (
-                                <button
-                                    type="button"
-                                    className={global.buttonSecondary}
-                                    onClick={resetForm}
-                                    disabled={saving}
-                                >
-                                    Cancel Edit
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                className={global.buttonSecondary}
+                                onClick={cancelTimesheetEdit}
+                                disabled={saving}
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </section>
                 )}
@@ -1220,94 +1272,146 @@ export default function TimesheetDetailPage() {
                         <h2 className={global.headLeft}>Time Entries</h2>
                     </div>
 
+                    <Pagination
+                        currentPage={page}
+                        perPage={perPage}
+                        totalItems={sortedEntries.length}
+                        onPageChange={setPage}
+                        onPerPageChange={(value) => {
+                            setPerPage(value);
+                            setPage(1);
+                        }}
+                        label="entries"
+                    />
+
                     {entries.length === 0 ? (
                         <p className={global.subcentered}>No time entries yet.</p>
                     ) : (
-                        <div className={styles.historyList}>
-                            {sortedEntries.map((entry) => (
-                                <div
-                                    key={entry.id}
-                                    className={
-                                        editingEntry?.id === entry.id
-                                            ? `${styles.historyItem} ${styles.historyItemActive}`
-                                            : styles.historyItem
-                                    }
-                                >
-                                    <div className={styles.historyDetails}>
-                                        <div>
-                                            <span className={styles.historyLabel}>Date</span>
-                                            <span className={styles.historyValue}>
-                                                {formatDate(entry.work_date)}
-                                                {entry.drove && (
-                                                    <span title="Drove">
-                                                        <CarFront
-                                                            size={16}
-                                                            style={{
-                                                                display: "inline-block",
-                                                                verticalAlign: "middle",
-                                                                marginLeft: 6,
-                                                            }}
-                                                        />
+                        <>
+                            <div className={styles.historyList}>
+                                {paginatedEntries.map((entry) => {
+                                    const isExpanded = expandedEntryIds.includes(entry.id);
+                                    const hasDescription = Boolean(entry.description);
+
+                                    return (
+                                        <div
+                                            key={entry.id}
+                                            className={`${styles.historyItem} ${styles.entryCard} ${editingEntry?.id === entry.id
+                                                ? styles.historyItemActive
+                                                : ""
+                                                }`}
+                                        >
+                                            <button
+                                                type="button"
+                                                className={styles.entrySummary}
+                                                onClick={() => toggleEntryExpanded(entry.id)}
+                                                disabled={!hasDescription}
+                                            >
+                                                <div className={styles.entryDate}>
+                                                    <span className={styles.historyLabel}>Date</span>
+                                                    <span className={styles.historyValue}>
+                                                        {formatDate(entry.work_date)}
+                                                        {entry.drove && (
+                                                            <CarFront
+                                                                size={16}
+                                                                style={{
+                                                                    display: "inline-block",
+                                                                    verticalAlign: "middle",
+                                                                    marginLeft: 8,
+                                                                }}
+                                                            />
+                                                        )}
                                                     </span>
+                                                </div>
+
+                                                <div className={styles.entryMetrics}>
+                                                    <div>
+                                                        <span className={styles.historyLabel}>Time</span>
+                                                        <span className={styles.historyValue}>
+                                                            {getTimeOnly(entry.start_time)} →{" "}
+                                                            {entry.end_time ? getTimeOnly(entry.end_time) : "TBD"}
+                                                        </span>
+                                                    </div>
+
+                                                    <div>
+                                                        <span className={styles.historyLabel}>Hours</span>
+                                                        <span className={styles.historyValue}>
+                                                            {entry.end_time
+                                                                ? formatHoursFromMinutes(entry.duration_minutes)
+                                                                : formatHoursFromMinutes(activeElapsedMinutes)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.entryCategory}>
+                                                    <span className={styles.historyLabel}>Category</span>
+                                                    <span className={styles.historyValue}>
+                                                        {entry.category || "-"}
+                                                    </span>
+                                                </div>
+
+                                                {hasDescription && (
+                                                    <div className={styles.entryDescriptionControl}>
+                                                        <span>
+                                                            {isExpanded
+                                                                ? "Hide Description"
+                                                                : "View Description"}
+                                                        </span>
+                                                        {isExpanded ? (
+                                                            <ChevronUp size={18} />
+                                                        ) : (
+                                                            <ChevronDown size={18} />
+                                                        )}
+                                                    </div>
                                                 )}
-                                            </span>
-                                        </div>
 
-                                        <div>
-                                            <span className={styles.historyLabel}>Time</span>
-                                            <span className={styles.historyValue}>
-                                                {getTimeOnly(entry.start_time)} →{" "}
-                                                {entry.end_time ? getTimeOnly(entry.end_time) : "TBD"}
-                                            </span>
-                                        </div>
+                                                {hasDescription && isExpanded && (
+                                                    <div className={styles.entryDescription}>
+                                                        {entry.description}
+                                                    </div>
+                                                )}
+                                            </button>
 
-                                        <div>
-                                            <span className={styles.historyLabel}>Hours</span>
-                                            <span className={styles.historyValue}>
-                                                {entry.end_time ? formatHoursFromMinutes(entry.duration_minutes) : formatHoursFromMinutes(activeElapsedMinutes)}
-                                            </span>
-                                        </div>
+                                            {canEdit && (
+                                                <div className={styles.entryActions}>
+                                                    <button
+                                                        type="button"
+                                                        className={global.iconButton}
+                                                        onClick={() => handleEdit(entry)}
+                                                        disabled={!entry.end_time}
+                                                        title={entry.end_time ? "Edit time entry" : "Clock out before editing"}
+                                                    >
+                                                        <Pencil size={18} />
+                                                    </button>
 
-                                        <div>
-                                            <span className={styles.historyLabel}>Category</span>
-                                            <span className={styles.historyValue}>
-                                                {entry.category || "-"}
-                                            </span>
-
-                                            {entry.description && (
-                                                <span className={styles.historySubValue}>
-                                                    {entry.description}
-                                                </span>
+                                                    <button
+                                                        type="button"
+                                                        className={global.iconButton}
+                                                        onClick={() => openDeleteModal(entry)}
+                                                        disabled={deletingId === entry.id}
+                                                        title="Delete time entry"
+                                                    >
+                                                        <Trash size={18} />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
-                                    </div>
+                                    );
+                                })}
+                            </div>
 
-                                    {canEdit && (
-                                        <div className={styles.historyActions}>
-                                            <button
-                                                type="button"
-                                                className={global.iconButton}
-                                                onClick={() => handleEdit(entry)}
-                                                disabled={!entry.end_time}
-                                                title={entry.end_time ? "Edit time entry" : "Clock out before editing"}
-                                            >
-                                                <Pencil size={18} />
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                className={global.iconButton}
-                                                onClick={() => openDeleteModal(entry)}
-                                                disabled={deletingId === entry.id}
-                                                title="Delete time entry"
-                                            >
-                                                <Trash size={18} />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                            <Pagination
+                                currentPage={page}
+                                perPage={perPage}
+                                totalItems={sortedEntries.length}
+                                onPageChange={setPage}
+                                onPerPageChange={(value) => {
+                                    setPerPage(value);
+                                    setPage(1);
+                                }}
+                                label="entries"
+                            />
+                        </>
                     )}
                 </section>
             </div>

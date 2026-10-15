@@ -1,4 +1,3 @@
-
 .pageBar {
   display: flex;
   justify-content: space-between;
@@ -41,7 +40,40 @@
 }
 
 @media (max-width: 768px) {
+  .pageBar {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 8px;
+  }
+
   .pageInfo {
     color: var(--text-primary) !important;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .pageControls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .pageControls label {
+    white-space: nowrap;
+  }
+
+  .pageControls select,
+  .pageControls button {
+    flex-shrink: 0;
+  }
+
+  .pageControls button {
+    min-width: 32px;
+    min-height: 32px;
   }
 }

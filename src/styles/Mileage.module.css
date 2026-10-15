@@ -90,6 +90,19 @@
     flex-wrap: wrap;
 }
 
+.historyHeaderRow .actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 180px;
+    flex-shrink: 0;
+    margin-top: 0;
+}
+
+.historyHeaderRow .actions button {
+    width: 100%;
+    white-space: nowrap;
+}
+
 .statsGrid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -122,6 +135,33 @@
     justify-content: space-between;
     gap: 24px;
     margin-bottom: 18px;
+}
+
+.timesheetDetailsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 24px;
+}
+
+.timesheetDetailItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.timesheetDetailsNotes {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-light);
+}
+
+.timesheetDetailsNotes p {
+    margin: 6px 0 0;
+    color: var(--text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .historyHeaderActions {
@@ -172,6 +212,101 @@
 .historyItemActive {
     border-color: var(--brand);
     box-shadow: 0 0 0 1px var(--brand);
+}
+
+/* Expandable Time Entry Cards */
+
+.entryCard {
+    position: relative;
+    display: block;
+    padding: 0;
+    overflow: hidden;
+}
+
+.entrySummary {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    padding-right: 18px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.entrySummary:disabled {
+    cursor: default;
+}
+
+.entrySummary:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: -3px;
+    border-radius: 12px;
+}
+
+.entryDate {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 90px;
+}
+
+.entryMetrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.entryMetrics>div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.entryCategory {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-light);
+    min-width: 0;
+}
+
+.entryDescriptionControl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.entryDescription {
+    margin-top: 12px;
+    padding: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.entryActions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .historyDetails {
@@ -286,6 +421,28 @@
     .actions button {
         width: 100%;
     }
+
+    .entrySummary {
+        padding: 14px;
+    }
+
+    .entryDate {
+        padding-right: 90px;
+    }
+
+    .entryMetrics {
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .entryCategory {
+        margin-top: 14px;
+        padding-top: 12px;
+    }
+
+    .entryDescription {
+        padding: 12px;
+    }
 }
 
 .paymentStampWrapper {
@@ -360,4 +517,103 @@
 .droveToggle:has(input:disabled) {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.timesheetOverview {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(1180px, 100%);
+    margin: 0 auto 24px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.overviewItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 14px 8px;
+    text-align: center;
+}
+
+.overviewItem+.overviewItem {
+    border-left: 1px solid var(--border-light);
+}
+
+.overviewLabel {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.overviewValue {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .timesheetOverview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .overviewItem {
+        padding: 12px 8px;
+    }
+
+    .overviewItem:nth-child(3) {
+        border-left: none;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .overviewItem:nth-child(4) {
+        border-top: 1px solid var(--border-light);
+    }
+
+    .overviewLabel {
+        font-size: 0.75rem;
+    }
+
+    .overviewValue {
+        font-size: 0.95rem;
+    }
+}
+
+.collapsibleHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.collapsibleHeader h2 {
+    margin: 0;
+}
+
+.collapsibleHeader svg {
+    flex-shrink: 0;
+}
+
+.collapsibleHeader:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 6px;
+    border-radius: 4px;
+}
+
+.collapsibleHeader+.historyHeaderRow,
+.collapsibleHeader+.sectionHeader {
+    margin-top: 20px;
 }
