@@ -23,7 +23,7 @@ import {
     getTimeOnly,
     getTodayDateString,
 } from "@/app/utils/formatDate";
-import { Pencil, Share2, Trash } from "lucide-react";
+import { CarFront, Pencil, Share2, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -57,8 +57,11 @@ export default function TimesheetDetailPage() {
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
 
+    const [drove, setDrove] = useState(false);
+
     const [liveCategory, setLiveCategory] = useState("");
     const [liveDescription, setLiveDescription] = useState("");
+    const [liveDrove, setLiveDrove] = useState(false);
     const [clockSaving, setClockSaving] = useState(false);
     const [activeElapsedMinutes, setActiveElapsedMinutes] = useState(0);
 
@@ -195,6 +198,7 @@ export default function TimesheetDetailPage() {
         setEndTime("");
         setCategory("");
         setDescription("");
+        setDrove(false);
     }
 
     function startTimesheetEdit() {
@@ -368,6 +372,7 @@ export default function TimesheetDetailPage() {
             duration_minutes: calculatedMinutes,
             category: category.trim(),
             description: description.trim() || null,
+            drove,
         };
     }
 
@@ -379,6 +384,7 @@ export default function TimesheetDetailPage() {
             duration_minutes: calculatedMinutes,
             category: category.trim(),
             description: description.trim() || null,
+            drove,
         };
     }
 
@@ -400,6 +406,7 @@ export default function TimesheetDetailPage() {
                         start_time: getCurrentTimeString(),
                         category: liveCategory.trim(),
                         description: liveDescription.trim() || null,
+                        drove: liveDrove,
                     }),
                 }
             );
@@ -415,6 +422,7 @@ export default function TimesheetDetailPage() {
 
             setLiveCategory("");
             setLiveDescription("");
+            setLiveDrove(false);
             setActiveElapsedMinutes(0);
 
             toast.success("Clocked in!");
@@ -519,6 +527,7 @@ export default function TimesheetDetailPage() {
         setEndTime(getTimeOnly(entry.end_time));
         setCategory(entry.category);
         setDescription(entry.description || "");
+        setDrove(Boolean(entry.drove));
 
         requestAnimationFrame(() => {
             timeclockEditRef.current?.scrollIntoView({
@@ -958,7 +967,7 @@ export default function TimesheetDetailPage() {
                 </section>
 
                 {canEdit && (
-                    <section className={styles.section}>
+                    <section className={styles.section} style={{ position: "relative" }}>
                         <div className={styles.sectionHeader}>
                             <h2 className={global.headLeft}>
                                 Live Time Tracking
@@ -968,6 +977,19 @@ export default function TimesheetDetailPage() {
                                 Clock in now & clock out when you finish!
                             </p>
                         </div>
+
+                        {activeEntry?.drove && (
+                            <CarFront
+                                size={36}
+                                strokeWidth={1.8}
+                                style={{
+                                    position: "absolute",
+                                    top: "24px",
+                                    right: "28px",
+                                    color: "var(--text)",
+                                }}
+                            />
+                        )}
 
                         {activeEntry ? (
                             <>
@@ -1037,6 +1059,19 @@ export default function TimesheetDetailPage() {
                                             placeholder="Admin, project, scouting, etc. (optional)"
                                             disabled={clockSaving}
                                         />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={styles.droveToggle}>
+                                            <input
+                                                type="checkbox"
+                                                checked={liveDrove}
+                                                onChange={(e) => setLiveDrove(e.target.checked)}
+                                                disabled={clockSaving}
+                                            />
+                                            <CarFront size={18} />
+                                            <span>Drove</span>
+                                        </label>
                                     </div>
 
                                     <div className={`${styles.field} ${styles.fullWidth}`}>
@@ -1129,6 +1164,18 @@ export default function TimesheetDetailPage() {
                                 />
                             </div>
 
+                            <div className={styles.field}>
+                                <label className={styles.droveToggle}>
+                                    <input
+                                        type="checkbox"
+                                        checked={drove}
+                                        onChange={(e) => setDrove(e.target.checked)}
+                                    />
+                                    <CarFront size={18} />
+                                    <span>Drove</span>
+                                </label>
+                            </div>
+
                             <div className={`${styles.field} ${styles.fullWidth}`}>
                                 <label className={global.label}>Description</label>
                                 <textarea
@@ -1191,6 +1238,18 @@ export default function TimesheetDetailPage() {
                                             <span className={styles.historyLabel}>Date</span>
                                             <span className={styles.historyValue}>
                                                 {formatDate(entry.work_date)}
+                                                {entry.drove && (
+                                                    <span title="Drove">
+                                                        <CarFront
+                                                            size={16}
+                                                            style={{
+                                                                display: "inline-block",
+                                                                verticalAlign: "middle",
+                                                                marginLeft: 6,
+                                                            }}
+                                                        />
+                                                    </span>
+                                                )}
                                             </span>
                                         </div>
 

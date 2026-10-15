@@ -71,6 +71,7 @@ export const GET = withUser<Params>(async (_req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     created_at,
                     updated_at
                 FROM time_entries

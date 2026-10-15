@@ -73,6 +73,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                         WHEN $8::boolean THEN $9
                         ELSE description
                     END,
+                    drove = COALESCE($13, drove),
                     updated_at = NOW()
                 WHERE id = $10
                     AND timesheet_id = $11
@@ -87,6 +88,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     created_at,
                     updated_at
             `,
@@ -103,6 +105,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                 entryId,
                 id,
                 user.id,
+                validated.drove ?? null,
             ]
         );
 

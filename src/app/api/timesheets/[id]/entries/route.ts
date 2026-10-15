@@ -64,11 +64,12 @@ export const POST = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     updated_at
                 )
                 VALUES (
                     $1, $2, $3, $4, $5,
-                    $6, $7, $8, NOW()
+                    $6, $7, $8, $9, NOW()
                 )
                 RETURNING
                     id,
@@ -80,6 +81,7 @@ export const POST = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     created_at,
                     updated_at
             `,
@@ -92,6 +94,7 @@ export const POST = withUser<Params>(async (req, context, user) => {
                 validated.durationMinutes,
                 validated.category,
                 validated.description,
+                validated.drove,
             ]
         );
 

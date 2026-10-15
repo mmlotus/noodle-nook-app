@@ -23,6 +23,7 @@ export const POST = withUser<Params>(async (req, context, user) => {
 
         const category = body.category?.trim() || "";
         const description = body.description?.trim() || null;
+        const drove = body.drove === true;
 
         const timesheetResult = await db.query(
             `
@@ -83,11 +84,12 @@ export const POST = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     updated_at
                 )
                 VALUES (
                     $1, $2, $3, $4, NULL,
-                    NULL, $5, $6, NOW()
+                    NULL, $5, $6, $7, NOW()
                 )
                 RETURNING
                     id,
@@ -99,6 +101,7 @@ export const POST = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     created_at,
                     updated_at
             `,
@@ -109,6 +112,7 @@ export const POST = withUser<Params>(async (req, context, user) => {
                 startTime,
                 category,
                 description,
+                drove,
             ]
         );
 
@@ -200,6 +204,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                     duration_minutes,
                     category,
                     description,
+                    drove,
                     created_at,
                     updated_at
             `,

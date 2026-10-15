@@ -27,6 +27,7 @@ export type TimeEntryCreatePayload = {
     duration_minutes: number;
     category?: string;
     description?: string | null;
+    drove?: boolean;
 };
 
 export type TimeEntryUpdatePayload = {
@@ -36,6 +37,7 @@ export type TimeEntryUpdatePayload = {
     duration_minutes?: number;
     category?: string;
     description?: string | null;
+    drove?: boolean;
 };
 
 export type TimesheetShareCreatePayload = {
@@ -83,6 +85,7 @@ export type TimeEntry = {
     duration_minutes: string | number | null;
     category: string;
     description: string | null;
+    drove: boolean;
     created_at: string;
     updated_at: string;
 };
@@ -130,6 +133,7 @@ export type LiveClockInPayload = {
     start_time: string;
     category: string;
     description?: string | null;
+    drove?: boolean;
 };
 
 export type LiveClockOutPayload = {

@@ -135,6 +135,7 @@ export function validateTimeEntryCreatePayload(body: TimeEntryCreatePayload) {
         durationMinutes: body.duration_minutes,
         category,
         description: cleanString(body.description),
+        drove: body.drove === true,
     };
 }
 
@@ -166,6 +167,7 @@ export function validateTimeEntryUpdatePayload(body: TimeEntryUpdatePayload) {
         description: body.description === undefined
             ? undefined
             : cleanString(body.description),
+        drove: body.drove === undefined ? undefined : body.drove === true,
     };
 }
 

@@ -319,3 +319,45 @@
     border-color: #238b78;
     background: rgba(35, 139, 120, 0.1);
 }
+
+.droveToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    min-height: 42px;
+    width: fit-content;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.droveToggle:hover {
+    border-color: var(--text-muted);
+}
+
+.droveToggle:has(input:checked) {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: white;
+}
+
+.droveToggle input {
+    margin: 0;
+    accent-color: var(--brand);
+}
+
+.droveToggle:has(input:focus-visible) {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+}
+
+.droveToggle:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
