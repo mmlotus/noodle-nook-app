@@ -256,6 +256,25 @@ export default function TimesheetsPage() {
                                                 </span>
                                             </div>
 
+                                            {timesheet.notes?.trim() && !isExpanded && (
+                                                <span
+                                                    className={styles.historySubValue}
+                                                    style={{
+                                                        marginTop: "8px",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                    }}
+                                                >
+                                                    {(() => {
+                                                        const firstLine = timesheet.notes.trim().split(/\r?\n/)[0];
+                                                        return firstLine.length > 50
+                                                            ? `${firstLine.slice(0, 50).trimEnd()}...`
+                                                            : firstLine;
+                                                    })()}
+                                                </span>
+                                            )}
+
                                             <div className={styles.entryMetrics}>
                                                 <div>
                                                     <span className={styles.historyLabel}>
