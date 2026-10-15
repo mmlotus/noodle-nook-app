@@ -1306,68 +1306,81 @@ export default function TimesheetDetailPage() {
                                                 className={styles.entrySummary}
                                                 onClick={() => toggleEntryExpanded(entry.id)}
                                                 disabled={!hasDescription}
+                                                style={{ padding: 0 }}
                                             >
-                                                <div className={styles.entryDate}>
-                                                    <span className={styles.historyLabel}>Date</span>
-                                                    <span className={styles.historyValue}>
-                                                        {formatDate(entry.work_date)}
-                                                        {entry.drove && (
-                                                            <CarFront
-                                                                size={16}
-                                                                style={{
-                                                                    display: "inline-block",
-                                                                    verticalAlign: "middle",
-                                                                    marginLeft: 8,
-                                                                }}
-                                                            />
-                                                        )}
-                                                    </span>
-                                                </div>
-
-                                                <div className={styles.entryMetrics}>
-                                                    <div>
-                                                        <span className={styles.historyLabel}>Time</span>
+                                                <div style={{ padding: "18px" }}>
+                                                    <div className={styles.entryDate}>
+                                                        <span className={styles.historyLabel}>Date</span>
                                                         <span className={styles.historyValue}>
-                                                            {getTimeOnly(entry.start_time)} →{" "}
-                                                            {entry.end_time ? getTimeOnly(entry.end_time) : "TBD"}
+                                                            {formatDate(entry.work_date)}
+                                                            {entry.drove && (
+                                                                <CarFront
+                                                                    size={16}
+                                                                    style={{
+                                                                        display: "inline-block",
+                                                                        verticalAlign: "middle",
+                                                                        marginLeft: 8,
+                                                                    }}
+                                                                />
+                                                            )}
                                                         </span>
                                                     </div>
 
-                                                    <div>
-                                                        <span className={styles.historyLabel}>Hours</span>
+                                                    <div className={styles.entryMetrics}>
+                                                        <div>
+                                                            <span className={styles.historyLabel}>Time</span>
+                                                            <span className={styles.historyValue}>
+                                                                {getTimeOnly(entry.start_time)} →{" "}
+                                                                {entry.end_time ? getTimeOnly(entry.end_time) : "TBD"}
+                                                            </span>
+                                                        </div>
+
+                                                        <div>
+                                                            <span className={styles.historyLabel}>Hours</span>
+                                                            <span className={styles.historyValue}>
+                                                                {entry.end_time
+                                                                    ? formatHoursFromMinutes(entry.duration_minutes)
+                                                                    : formatHoursFromMinutes(activeElapsedMinutes)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className={styles.entryCategory}>
+                                                        <span className={styles.historyLabel}>Reference</span>
                                                         <span className={styles.historyValue}>
-                                                            {entry.end_time
-                                                                ? formatHoursFromMinutes(entry.duration_minutes)
-                                                                : formatHoursFromMinutes(activeElapsedMinutes)}
+                                                            {entry.category || "-"}
                                                         </span>
                                                     </div>
-                                                </div>
-
-                                                <div className={styles.entryCategory}>
-                                                    <span className={styles.historyLabel}>Reference</span>
-                                                    <span className={styles.historyValue}>
-                                                        {entry.category || "-"}
-                                                    </span>
                                                 </div>
 
                                                 {hasDescription && (
-                                                    <div className={styles.entryDescriptionControl}>
-                                                        <span>
-                                                            {isExpanded
-                                                                ? "Hide Description"
-                                                                : "View Description"}
-                                                        </span>
-                                                        {isExpanded ? (
-                                                            <ChevronUp size={18} />
-                                                        ) : (
-                                                            <ChevronDown size={18} />
-                                                        )}
-                                                    </div>
-                                                )}
+                                                    <div
+                                                        style={{
+                                                            padding: "12px 18px 18px",
+                                                            borderTop: "1px solid var(--border-light)",
+                                                            background: "#f0f0f0",
+                                                        }}
+                                                    >
+                                                        <div
+                                                            className={styles.entryDescriptionControl}
+                                                            style={{ marginTop: 0 }}
+                                                        >
+                                                            <span>
+                                                                {isExpanded ? "Hide Description" : "View Description"}
+                                                            </span>
 
-                                                {hasDescription && isExpanded && (
-                                                    <div className={styles.entryDescription}>
-                                                        {entry.description}
+                                                            {isExpanded ? (
+                                                                <ChevronUp size={18} />
+                                                            ) : (
+                                                                <ChevronDown size={18} />
+                                                            )}
+                                                        </div>
+
+                                                        {isExpanded && (
+                                                            <div className={styles.entryDescription}>
+                                                                {entry.description}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </button>

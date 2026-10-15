@@ -325,14 +325,19 @@ export default function TimesheetsPage() {
                                                     onClick={() => toggleNotes(timesheet.id)}
                                                     aria-expanded={isExpanded}
                                                 >
-                                                    <span>
-                                                        {isExpanded ? "Hide Notes" : "View Notes"}
-                                                    </span>
-                                                    {isExpanded ? (
-                                                        <ChevronUp size={18} />
-                                                    ) : (
-                                                        <ChevronDown size={18} />
-                                                    )}
+                                                    <div
+                                                        className={styles.entryDescriptionControl}
+                                                        style={{ marginTop: 0, width: "100%" }}
+                                                    >
+                                                        <span>
+                                                            {isExpanded ? "Hide Notes" : "View Notes"}
+                                                        </span>
+                                                        {isExpanded ? (
+                                                            <ChevronUp size={18} />
+                                                        ) : (
+                                                            <ChevronDown size={18} />
+                                                        )}
+                                                    </div>
                                                 </button>
 
                                                 {isExpanded && (
