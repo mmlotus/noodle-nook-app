@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 import { formatDate } from "../utils/formatDate";
 import Pagination from "@/components/Pagination";
 import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function TimesheetsPage() {
     const [timesheets, setTimesheets] = useState<TimesheetSummary[]>([]);
+    const [expandedNotesIds, setExpandedNotesIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [page, setPage] = useState(1);
@@ -37,6 +39,14 @@ export default function TimesheetsPage() {
                 entries: 0,
             });
     }, [timesheets]);
+
+    function toggleNotes(id: string) {
+        setExpandedNotesIds((current) =>
+            current.includes(id)
+                ? current.filter((item) => item !== id)
+                : [...current, id]
+        );
+    }
 
     function getEstimatedPay(timesheet: TimesheetSummary) {
         if (!timesheet.is_payable || !timesheet.hourly_rate) return 0;
@@ -107,146 +117,247 @@ export default function TimesheetsPage() {
                 subtitle="Log your time & build timesheets."
             />
 
-            <div className={styles.mileagePage}>
-                <section className={styles.section}>
-                    <div className={styles.historyHeaderRow}>
-                        <div>
-                            <h2 className={global.headLeft}>My Timesheets</h2>
-                            <p>
-                                Showing {timesheets.length} saved{" "}
-                                {timesheets.length === 1 ? "timesheet" : "timesheets"}
-                            </p>
-                        </div>
+            <section className={styles.section}>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "8px",
+                        marginBottom: "16px",
+                    }}
+                >
+                    <h2 className={global.headLeft}>My Timesheets</h2>
+                    <span>
+                        {timesheets.length} saved
+                    </span>
+                </div>
 
-                        <div className={styles.historyHeaderActions}>
-                            <Link href="/timesheets/new" className={global.buttonBrand}>
-                                New Timesheet
-                            </Link>
-
-                            <Link href="/timesheets/shared" className={global.buttonSecondary}>
-                                Shared Timesheets
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={global.headLeft}>Timesheet Stats</h2>
-                    </div>
-
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Total Hours</p>
-                            <p className={styles.statValue}>
-                                {formatHours(stats.totalMinutes)}
-                            </p>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Timesheets</p>
-                            <p className={styles.statValue}>{stats.timesheets}</p>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <p className={styles.statLabel}>Entries</p>
-                            <p className={styles.statValue}>{stats.entries}</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={global.headLeft}>Timesheet History</h2>
+                <div
+                    className={styles.timesheetOverview}
+                    style={{
+                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                        marginBottom: "12px",
+                    }}
+                >
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Total Hours</span>
+                        <strong className={styles.overviewValue}>
+                            {formatHours(stats.totalMinutes)}
+                        </strong>
                     </div>
 
-                    {timesheets.length === 0 ? (
-                        <p className={global.subcentered}>No timesheets yet.</p>
-                    ) : (
-                        <>
-                            <div className={styles.historyList}>
-                                {paginatedTimesheets.map((timesheet) => (
-                                    <Link
+                    <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Entries</span>
+                        <strong className={styles.overviewValue}>
+                            {stats.entries}
+                        </strong>
+                    </div>
+                </div>
+
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                        gap: "8px",
+                    }}
+                >
+                    <Link
+                        href="/timesheets/new"
+                        className={global.buttonBrand}
+                        style={{
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minWidth: 0,
+                        }}
+                    >
+                        New Timesheet
+                    </Link>
+
+                    <Link
+                        href="/timesheets/shared"
+                        className={global.buttonSecondary}
+                        style={{
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minWidth: 0,
+                        }}
+                    >
+                        Shared Timesheets
+                    </Link>
+                </div>
+
+                <div
+                    style={{
+                        borderTop: "1px solid var(--border-light)",
+                        margin: "24px 0",
+                    }}
+                />
+
+                <div className={styles.sectionHeader}>
+                    <h2 className={global.headLeft}>Timesheet History</h2>
+                </div>
+
+                {timesheets.length === 0 ? (
+                    <p className={global.subcentered}>No timesheets yet.</p>
+                ) : (
+                    <>
+                        <div className={styles.historyList}>
+                            {paginatedTimesheets.map((timesheet) => {
+                                const isExpanded = expandedNotesIds.includes(timesheet.id);
+
+                                return (
+                                    <div
                                         key={timesheet.id}
-                                        href={`/timesheets/${timesheet.id}`}
-                                        className={styles.historyItem}
+                                        className={`${styles.historyItem} ${styles.entryCard}`}
                                     >
-                                        <div className={styles.historyDetails}>
-                                            <div>
-                                                <span className={styles.historyLabel}>Period</span>
-                                                <span className={styles.historyValue}>
-                                                    {formatDate(timesheet.period_start)} -{" "}
-                                                    {formatDate(timesheet.period_end)}
+                                        <Link
+                                            href={`/timesheets/${timesheet.id}`}
+                                            className={styles.entrySummary}
+                                            style={{
+                                                textDecoration: "none",
+                                                paddingRight: "18px",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "flex-start",
+                                                    gap: "12px",
+                                                }}
+                                            >
+                                                <div>
+                                                    <span className={styles.historyLabel}>
+                                                        Period
+                                                    </span>
+                                                    <span className={styles.historyValue}>
+                                                        {formatDate(timesheet.period_start)} –{" "}
+                                                        {formatDate(timesheet.period_end)}
+                                                    </span>
+                                                </div>
+
+                                                <span
+                                                    style={{
+                                                        background: "var(--bg)",
+                                                        borderRadius: "999px",
+                                                        padding: "4px 8px",
+                                                        fontSize: "0.75rem",
+                                                        fontWeight: 700,
+                                                        textTransform: "uppercase",
+                                                    }}
+                                                >
+                                                    {timesheet.status}
                                                 </span>
                                             </div>
 
-                                            <div>
-                                                <span className={styles.historyLabel}>Hours</span>
-                                                <span className={styles.historyValue}>
-                                                    {formatHours(timesheet.total_minutes)}
-                                                </span>
+                                            <div className={styles.entryMetrics}>
+                                                <div>
+                                                    <span className={styles.historyLabel}>
+                                                        Hours
+                                                    </span>
+                                                    <span className={styles.historyValue}>
+                                                        {formatHours(timesheet.total_minutes)}
+                                                    </span>
+                                                </div>
+
+                                                <div>
+                                                    <span className={styles.historyLabel}>
+                                                        Entries
+                                                    </span>
+                                                    <span className={styles.historyValue}>
+                                                        {timesheet.entry_count}
+                                                    </span>
+                                                </div>
                                             </div>
 
                                             {timesheet.is_payable && (
-                                                <>
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "space-between",
+                                                        alignItems: "center",
+                                                        flexWrap: "wrap",
+                                                        gap: "12px",
+                                                        marginTop: "16px",
+                                                    }}
+                                                >
                                                     <div>
-                                                        <span className={styles.historyLabel}>Estimated Pay</span>
+                                                        <span className={styles.historyLabel}>
+                                                            Estimated Pay
+                                                        </span>
                                                         <span className={styles.historyValue}>
                                                             ${getEstimatedPay(timesheet).toFixed(2)}
                                                         </span>
-
                                                         <span className={styles.historySubValue}>
                                                             ${Number(timesheet.hourly_rate || 0).toFixed(2)}/hr
                                                         </span>
                                                     </div>
 
-                                                    <div className={styles.paymentStampWrapper}>
-                                                        <div
-                                                            className={`${styles.paymentStamp} ${timesheet.is_paid ? styles.paymentStampPaid : styles.paymentStampUnpaid
-                                                                }`}
-                                                        >
-                                                            {timesheet.is_paid ? "PAID" : "UNPAID"}
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )}
-
-                                            <div>
-                                                <span className={styles.historyLabel}>Entries</span>
-                                                <span className={styles.historyValue}>
-                                                    {timesheet.entry_count}
-                                                </span>
-                                            </div>
-
-                                            <div>
-                                                <span className={styles.historyLabel}>Status</span>
-                                                <span className={styles.historyValue}>
-                                                    {timesheet.status}
-                                                </span>
-
-                                                {timesheet.notes && (
-                                                    <span className={styles.historySubValue}>
-                                                        Notes: {timesheet.notes}
+                                                    <span
+                                                        className={`${styles.paymentStamp} ${timesheet.is_paid
+                                                            ? styles.paymentStampPaid
+                                                            : styles.paymentStampUnpaid
+                                                            }`}
+                                                    >
+                                                        {timesheet.is_paid ? "PAID" : "UNPAID"}
                                                     </span>
+                                                </div>
+                                            )}
+                                        </Link>
+
+                                        {timesheet.notes && (
+                                            <div
+                                                style={{
+                                                    padding: "12px 18px 18px",
+                                                    borderTop: "1px solid var(--border-light)",
+                                                    background: "#f0f0f0",
+                                                }}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className={styles.collapsibleHeader}
+                                                    onClick={() => toggleNotes(timesheet.id)}
+                                                    aria-expanded={isExpanded}
+                                                >
+                                                    <span>
+                                                        {isExpanded ? "Hide Notes" : "View Notes"}
+                                                    </span>
+                                                    {isExpanded ? (
+                                                        <ChevronUp size={18} />
+                                                    ) : (
+                                                        <ChevronDown size={18} />
+                                                    )}
+                                                </button>
+
+                                                {isExpanded && (
+                                                    <div className={styles.entryDescription}>
+                                                        {timesheet.notes}
+                                                    </div>
                                                 )}
                                             </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                            <Pagination
-                                currentPage={page}
-                                perPage={perPage}
-                                totalItems={timesheets.length}
-                                onPageChange={setPage}
-                                onPerPageChange={setPerPage}
-                                label="timesheets"
-                            />
-                        </>
-                    )}
-                </section>
-            </div>
+                        <Pagination
+                            currentPage={page}
+                            perPage={perPage}
+                            totalItems={timesheets.length}
+                            onPageChange={setPage}
+                            onPerPageChange={setPerPage}
+                            label="timesheets"
+                        />
+                    </>
+                )}
+            </section>
         </main>
     );
 }
