@@ -207,6 +207,15 @@ export default function TimesheetsPage() {
                     <p className={global.subcentered}>No timesheets yet.</p>
                 ) : (
                     <>
+                        <Pagination
+                            currentPage={page}
+                            perPage={perPage}
+                            totalItems={timesheets.length}
+                            onPageChange={setPage}
+                            onPerPageChange={setPerPage}
+                            label="timesheets"
+                        />
+
                         <div className={styles.historyList}>
                             {paginatedTimesheets.map((timesheet) => {
                                 const isExpanded = expandedNotesIds.includes(timesheet.id);
