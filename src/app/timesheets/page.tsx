@@ -256,6 +256,13 @@ export default function TimesheetsPage() {
                                                 </span>
                                             </div>
 
+                                            {timesheet.payer?.trim() && (
+                                                <div style={{ marginTop: "8px" }}>
+                                                    <span className={styles.historyLabel}>Payer</span>
+                                                    <span className={styles.historyValue}>{timesheet.payer}</span>
+                                                </div>
+                                            )}
+
                                             {timesheet.notes?.trim() && !isExpanded && (
                                                 <span
                                                     className={styles.historySubValue}

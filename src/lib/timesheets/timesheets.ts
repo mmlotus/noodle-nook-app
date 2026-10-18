@@ -53,6 +53,7 @@ export function validateTimesheetCreatePayload(body: TimesheetCreatePayload) {
         periodStart: body.period_start,
         periodEnd: body.period_end,
         notes: cleanString(body.notes),
+        payer: cleanString(body.payer),
         isPayable,
         hourlyRate,
     };
@@ -91,6 +92,9 @@ export function validateTimesheetUpdatePayload(body: TimesheetUpdatePayload) {
         status: body.status,
         notes: Object.prototype.hasOwnProperty.call(body, "notes")
             ? cleanString(body.notes)
+            : undefined,
+        payer: Object.prototype.hasOwnProperty.call(body, "payer")
+            ? cleanString(body.payer)
             : undefined,
         isPayable: hasIsPayable ? Boolean(body.is_payable) : undefined,
         hourlyRate: hasHourlyRate ? cleanHourlyRate(body.hourly_rate) : undefined,

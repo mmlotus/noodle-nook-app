@@ -176,6 +176,15 @@ export default function SharedTimesheetsPage() {
                                                 </span>
                                             </div>
 
+                                            {timesheet.payer?.trim() && (
+                                                <div>
+                                                    <span className={styles.historyLabel}>Payer</span>
+                                                    <span className={styles.historyValue}>
+                                                        {timesheet.payer}
+                                                    </span>
+                                                </div>
+                                            )}
+
                                             <div>
                                                 <span className={styles.historyLabel}>Hours</span>
                                                 <span className={styles.historyValue}>
@@ -195,7 +204,7 @@ export default function SharedTimesheetsPage() {
                                                     Shared: {formatDate(timesheet.shared_at)}
                                                 </span>
                                             </div>
-                                            
+
                                             <div>
                                                 <span className={styles.historySubValue}>
                                                     {timesheet.is_payable

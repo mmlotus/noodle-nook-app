@@ -12,6 +12,7 @@ import {
     TimesheetAccess,
     TimesheetDetail,
     TimesheetShareRow,
+    TimesheetSummary,
 } from "@/types/timesheets";
 import {
     formatDate,
@@ -49,8 +50,11 @@ export default function TimesheetDetailPage() {
     const [editPeriodStart, setEditPeriodStart] = useState("");
     const [editPeriodEnd, setEditPeriodEnd] = useState("");
     const [editNotes, setEditNotes] = useState("");
+    const [editPayer, setEditPayer] = useState("");
     const [editIsPayable, setEditIsPayable] = useState(false);
     const [editHourlyRate, setEditHourlyRate] = useState("");
+
+    const [payerSuggestions, setPayerSuggestions] = useState<string[]>([]);
 
     const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
     const [expandedEntryIds, setExpandedEntryIds] = useState<string[]>([]);
@@ -76,9 +80,11 @@ export default function TimesheetDetailPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deletingId, setDeletingId] = useState("");
+    const [showDeleteTimesheetModal, setShowDeleteTimesheetModal] = useState(false);
+    const [deletingTimesheet, setDeletingTimesheet] = useState(false);
 
     const canEdit = Boolean(access?.canEdit) && timesheet?.status === "open";
-    const canEditTimesheetSettings = Boolean(access?.canEdit) && !timesheet?.is_paid;
+    const canEditTimesheetSettings = Boolean(access?.canEdit);
 
     const calculatedMinutes = useMemo(() => {
         return getMinutesBetweenTimes(startTime, endTime);
@@ -124,6 +130,30 @@ export default function TimesheetDetailPage() {
         const hours = stats.totalMinutes / 60;
         return hours * Number(timesheet.hourly_rate);
     }, [stats.totalMinutes, timesheet]);
+
+    useEffect(() => {
+        async function loadPayers() {
+            try {
+                const res = await fetch("/api/timesheets");
+                if (!res.ok) return;
+
+                const data: { timesheets: TimesheetSummary[] } = await res.json();
+
+                const uniquePayers = [
+                    ...new Set(data.timesheets
+                        .map((timesheet) => timesheet.payer?.trim())
+                        .filter((value): value is string => Boolean(value))
+                    ),
+                ].sort((a, b) => a.localeCompare(b));
+
+                setPayerSuggestions(uniquePayers);
+            } catch (err) {
+                console.error("Failed to load payer suggestions:", err);
+            }
+        }
+
+        void loadPayers();
+    }, []);
 
     const loadTimesheet = useCallback(async () => {
         try {
@@ -219,6 +249,7 @@ export default function TimesheetDetailPage() {
         setEditPeriodStart(getDateOnly(timesheet.period_start));
         setEditPeriodEnd(getDateOnly(timesheet.period_end));
         setEditNotes(timesheet.notes || "");
+        setEditPayer(timesheet.payer || "");
         setEditIsPayable(Boolean(timesheet.is_payable));
         setEditHourlyRate(
             timesheet.hourly_rate === null || timesheet.hourly_rate === undefined
@@ -245,6 +276,8 @@ export default function TimesheetDetailPage() {
     }
 
     function validateTimesheetEdit() {
+        if (timesheet?.is_paid) return true;
+
         if (!editPeriodStart) {
             toast.error("Please choose a period start date.");
             return false;
@@ -299,14 +332,21 @@ export default function TimesheetDetailPage() {
             const res = await fetch(`/api/timesheets/${timesheetId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    period_start: editPeriodStart,
-                    period_end: editPeriodEnd,
-                    notes: editNotes.trim() || null,
-                    is_payable: editIsPayable,
-                    hourly_rate: editIsPayable ? editHourlyRate : null,
-                    is_paid: editIsPayable ? timesheet.is_paid : false,
-                }),
+                body: JSON.stringify(
+                    timesheet.is_paid
+                        ? {
+                            notes: editNotes.trim() || null,
+                            payer: editPayer.trim() || null,
+                        }
+                        : {
+                            period_start: editPeriodStart,
+                            period_end: editPeriodEnd,
+                            notes: editNotes.trim() || null,
+                            payer: editPayer.trim() || null,
+                            is_payable: editIsPayable,
+                            hourly_rate: editIsPayable ? editHourlyRate : null,
+                            is_paid: editIsPayable ? timesheet.is_paid : false,
+                        }),
             });
 
             const data = await res.json();
@@ -640,6 +680,32 @@ export default function TimesheetDetailPage() {
             toast.error("Could not update payment status.");
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleDeleteTimesheet() {
+        if (!timesheet || !access?.isOwner || timesheet.is_paid || entries.length > 0) {
+            toast.error("This timesheet cannot be deleted.");
+            return;
+        }
+
+        setDeletingTimesheet(true);
+
+        try {
+            const res = await fetch(`/api/timesheets/${timesheetId}`, {
+                method: "DELETE",
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to delete timesheet.");
+
+            toast.success("Timesheet deleted!");
+            router.push("/timesheets");
+        } catch (err) {
+            console.error("handleDeleteTimesheet error:", err);
+            toast.error(err instanceof Error ? err.message : "Could not delete timesheet.");
+        } finally {
+            setDeletingTimesheet(false);
         }
     }
 
@@ -1039,6 +1105,15 @@ export default function TimesheetDetailPage() {
                                         </span>
                                     </div>
 
+                                    {timesheet.payer?.trim() && (
+                                        <div className={styles.timesheetDetailItem}>
+                                            <span className={styles.historyLabel}>Payer</span>
+                                            <span className={styles.historyValue}>
+                                                {timesheet.payer}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <div className={styles.timesheetDetailItem}>
                                         <span className={styles.historyLabel}>Payable</span>
                                         <span className={styles.historyValue}>
@@ -1080,7 +1155,7 @@ export default function TimesheetDetailPage() {
                                         onClick={startTimesheetEdit}
                                         disabled={saving}
                                     >
-                                        Edit Timesheet
+                                        {timesheet.is_paid ? "Edit Details" : "Edit Timesheet"}
                                     </button>
                                 )}
 
@@ -1147,6 +1222,19 @@ export default function TimesheetDetailPage() {
                                         Share
                                     </button>
                                 )}
+
+                                {access?.isOwner && !timesheet.is_paid && entries.length === 0 && !editingTimesheet && (
+                                    <button
+                                        type="button"
+                                        className={global.buttonSecondary}
+                                        onClick={() => setShowDeleteTimesheetModal(true)}
+                                        disabled={saving || deletingTimesheet}
+                                    >
+                                        <Trash size={12} />{" "}
+                                        Delete Timesheet
+                                    </button>
+                                )}
+
                             </div>
                         </div>
                     )}
@@ -1155,83 +1243,113 @@ export default function TimesheetDetailPage() {
                 {editingTimesheet && (
                     <section ref={timesheetEditRef} className={styles.section}>
                         <div className={styles.sectionHeader}>
-                            <h2 className={global.headLeft}>Edit Timesheet</h2>
-                            <p>Update notes, whether this timesheet is payable, and the hourly rate.</p>
+                            <h2 className={global.headLeft}>
+                                {timesheet.is_paid ? "Edit Details" : "Edit Timesheet"}
+                            </h2>
+                            <p>
+                                {timesheet.is_paid
+                                    ? "Update the payer & notes for this paid timesheet."
+                                    : "Update notes, whether this timesheet is payable, and the hourly rate."}
+                            </p>
                         </div>
 
                         <div className={styles.quickEntryGrid}>
-                            <div className={styles.field}>
-                                <label className={global.label}>Period Start</label>
-                                <input
-                                    type="date"
-                                    className={global.input}
-                                    value={editPeriodStart}
-                                    onChange={(e) => setEditPeriodStart(e.target.value)}
-                                    disabled={saving}
-                                />
-                            </div>
+                            {!timesheet.is_paid && (
+                                <>
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Period Start</label>
+                                        <input
+                                            type="date"
+                                            className={global.input}
+                                            value={editPeriodStart}
+                                            onChange={(e) => setEditPeriodStart(e.target.value)}
+                                            disabled={saving}
+                                        />
+                                    </div>
 
-                            <div className={styles.field}>
-                                <label className={global.label}>Period End</label>
-                                <input
-                                    type="date"
-                                    className={global.input}
-                                    value={editPeriodEnd}
-                                    onChange={(e) => setEditPeriodEnd(e.target.value)}
-                                    disabled={saving}
-                                />
-                            </div>
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Period End</label>
+                                        <input
+                                            type="date"
+                                            className={global.input}
+                                            value={editPeriodEnd}
+                                            onChange={(e) => setEditPeriodEnd(e.target.value)}
+                                            disabled={saving}
+                                        />
+                                    </div>
 
-                            <div className={styles.field}>
-                                <label className={global.label}>Payable?</label>
+                                    <div className={styles.field}>
+                                        <label className={global.label}>Payable?</label>
 
-                                <div className={styles.methodRow}>
-                                    <button
-                                        type="button"
-                                        className={
-                                            editIsPayable
-                                                ? styles.methodButtonActive
-                                                : styles.methodButton
-                                        }
-                                        onClick={() => setEditIsPayable(true)}
-                                        disabled={saving}
-                                    >
-                                        Yes
-                                    </button>
+                                        <div className={styles.methodRow}>
+                                            <button
+                                                type="button"
+                                                className={
+                                                    editIsPayable
+                                                        ? styles.methodButtonActive
+                                                        : styles.methodButton
+                                                }
+                                                onClick={() => setEditIsPayable(true)}
+                                                disabled={saving}
+                                            >
+                                                Yes
+                                            </button>
 
-                                    <button
-                                        type="button"
-                                        className={
-                                            !editIsPayable
-                                                ? styles.methodButtonActive
-                                                : styles.methodButton
-                                        }
-                                        onClick={() => {
-                                            setEditIsPayable(false);
-                                            setEditHourlyRate("");
-                                        }}
-                                        disabled={saving}
-                                    >
-                                        No
-                                    </button>
-                                </div>
-                            </div>
+                                            <button
+                                                type="button"
+                                                className={
+                                                    !editIsPayable
+                                                        ? styles.methodButtonActive
+                                                        : styles.methodButton
+                                                }
+                                                onClick={() => {
+                                                    setEditIsPayable(false);
+                                                    setEditHourlyRate("");
+                                                }}
+                                                disabled={saving}
+                                            >
+                                                No
+                                            </button>
+                                        </div>
+                                    </div>
 
-                            {editIsPayable && (
-                                <div className={styles.field}>
-                                    <label className={global.label}>Hourly Rate</label>
-                                    <input
-                                        type="number"
-                                        className={global.input}
-                                        step="0.01"
-                                        min={0}
-                                        value={editHourlyRate}
-                                        onChange={(e) => setEditHourlyRate(e.target.value)}
-                                        placeholder="Example: 20.00"
-                                        disabled={saving}
-                                    />
-                                </div>
+                                    {editIsPayable && (
+                                        <div className={styles.field}>
+                                            <label className={global.label}>Hourly Rate</label>
+                                            <input
+                                                type="number"
+                                                className={global.input}
+                                                step="0.01"
+                                                min={0}
+                                                value={editHourlyRate}
+                                                onChange={(e) => setEditHourlyRate(e.target.value)}
+                                                placeholder="Example: 20.00"
+                                                disabled={saving}
+                                            />
+                                        </div>
+                                    )}
+                                </>
                             )}
+
+                            <div className={styles.field}>
+                                <label className={global.label}>Payer (Optional)</label>
+                                <input
+                                    type="text"
+                                    className={global.input}
+                                    value={editPayer}
+                                    onChange={(e) => setEditPayer(e.target.value)}
+                                    maxLength={120}
+                                    placeholder="e.g. Unique Drywall, Flawless Finish Drywall, Firefly Faux"
+                                    disabled={saving}
+                                    list="edit-payer-suggestions"
+                                />
+
+                                <datalist id="edit-payer-suggestions">
+                                    {payerSuggestions.map((sugg) => (
+                                        <option key={sugg} value={sugg} />
+                                    ))}
+                                </datalist>
+                            </div>
 
                             <div className={`${styles.field} ${styles.fullWidth}`}>
                                 <label className={global.label}>Notes</label>
@@ -1252,7 +1370,7 @@ export default function TimesheetDetailPage() {
                                 onClick={handleTimesheetSave}
                                 disabled={saving}
                             >
-                                {saving ? "Saving..." : "Save Timesheet"}
+                                {saving ? "Saving..." : timesheet.is_paid ? "Save Details" : "Save Timesheet"}
                             </button>
 
                             <button
@@ -1428,6 +1546,23 @@ export default function TimesheetDetailPage() {
                     )}
                 </section>
             </div>
+
+            <BasicModal
+                isOpen={showDeleteTimesheetModal}
+                title="Delete Timesheet?"
+                message="Are you sure you want to permanently delete this empty timesheet? This action cannot be undone."
+                cancelText="Cancel"
+                confirmText={deletingTimesheet ? "Deleting..." : "Yes, Delete"}
+                onClose={() => {
+                    if (!deletingTimesheet) {
+                        setShowDeleteTimesheetModal(false);
+                    }
+                }}
+                onConfirm={() => {
+                    void handleDeleteTimesheet();
+                }}
+                disableConfirm={deletingTimesheet}
+            />
 
             <BasicModal
                 isOpen={Boolean(pendingDeleteEntry)}

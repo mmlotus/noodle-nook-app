@@ -15,6 +15,7 @@ export const GET = withUser(async (_req, _context, user) => {
                     t.period_end,
                     t.status,
                     t.notes,
+                    t.payer,
                     t.is_payable,
                     t.hourly_rate,
                     t.is_paid,
@@ -51,14 +52,12 @@ export const POST = withUser(async (req, _context, user) => {
                     period_start,
                     period_end,
                     notes,
+                    payer,
                     is_payable,
                     hourly_rate,
                     updated_at
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                ON CONFLICT (user_id, period_start, period_end)
-                DO UPDATE SET
-                    updated_at = timesheets.updated_at
+                VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
                 RETURNING
                     id,
                     user_id,
@@ -66,6 +65,7 @@ export const POST = withUser(async (req, _context, user) => {
                     period_end,
                     status,
                     notes,
+                    payer,
                     is_payable,
                     hourly_rate,
                     is_paid,
@@ -78,6 +78,7 @@ export const POST = withUser(async (req, _context, user) => {
                 validated.periodStart,
                 validated.periodEnd,
                 validated.notes,
+                validated.payer,
                 validated.isPayable,
                 validated.hourlyRate,
             ]

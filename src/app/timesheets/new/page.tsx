@@ -4,9 +4,9 @@ import { getTodayDateString } from "@/app/utils/formatDate";
 import Banner from "@/components/Images/banner";
 import global from "@/styles/Global.module.css";
 import styles from "@/styles/Mileage.module.css";
-import { TimesheetCreatePayload } from "@/types/timesheets";
+import { TimesheetCreatePayload, TimesheetSummary } from "@/types/timesheets";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function NewTimesheetPage() {
@@ -17,10 +17,37 @@ export default function NewTimesheetPage() {
     const [periodStart, setPeriodStart] = useState(today);
     const [periodEnd, setPeriodEnd] = useState(today);
     const [notes, setNotes] = useState("");
+
     const [saving, setSaving] = useState(false);
 
+    const [payer, setPayer] = useState("");
+    const [payerSuggestions, setPayerSuggestions] = useState<string[]>([]);
     const [isPayable, setIsPayable] = useState(false);
     const [hourlyRate, setHourlyRate] = useState("");
+
+    useEffect(() => {
+        async function loadPayers() {
+            try {
+                const res = await fetch("/api/timesheets");
+                if (!res.ok) return;
+
+                const data: { timesheets: TimesheetSummary[] } = await res.json();
+
+                const uniquePayers = [
+                    ...new Set(data.timesheets
+                        .map((timesheet) => timesheet.payer?.trim())
+                        .filter((value): value is string => Boolean(value))
+                    ),
+                ].sort((a, b) => a.localeCompare(b));
+
+                setPayerSuggestions(uniquePayers);
+            } catch (err) {
+                console.error("Failed to load payer suggestions:", err);
+            }
+        }
+
+        void loadPayers();
+    }, []);
 
     function validateForm() {
         if (!periodStart) {
@@ -60,6 +87,7 @@ export default function NewTimesheetPage() {
                 period_start: periodStart,
                 period_end: periodEnd,
                 notes: notes.trim() || null,
+                payer: payer.trim() || null,
                 is_payable: isPayable,
                 hourly_rate: isPayable ? hourlyRate : null,
             };
@@ -119,7 +147,7 @@ export default function NewTimesheetPage() {
                                 onChange={(e) => setPeriodEnd(e.target.value)}
                             />
                         </div>
-                        
+
                         <div className={styles.field}>
                             <label className={global.label}>Payable?</label>
 
@@ -159,6 +187,25 @@ export default function NewTimesheetPage() {
                                 />
                             </div>
                         )}
+
+                        <div className={styles.field}>
+                            <label className={global.label}>Payer (Optional)</label>
+                            <input
+                                type="text"
+                                className={global.input}
+                                value={payer}
+                                onChange={(e) => setPayer(e.target.value)}
+                                maxLength={120}
+                                placeholder="e.g. Unique Drywall, Flawless Finish Drywall, Firefly Faux"
+                                list="payer-suggestions"
+                            />
+
+                            <datalist id="payer-suggestions">
+                                {payerSuggestions.map((sugg) => (
+                                    <option key={sugg} value={sugg} />
+                                ))}
+                            </datalist>
+                        </div>
 
                         <div className={`${styles.field} ${styles.fullWidth}`}>
                             <label className={global.label}>Notes</label>

@@ -15,6 +15,7 @@ export const GET = withUser(async (_req, _context, user) => {
                     t.period_end,
                     t.status,
                     t.notes,
+                    t.payer,
                     t.is_payable,
                     t.hourly_rate,
                     t.is_paid,

@@ -32,6 +32,7 @@ export const GET = withUser<Params>(async (_req, context, user) => {
                     t.period_start,
                     t.period_end,
                     t.status,
+                    t.payer,
                     t.notes,
                     t.is_payable,
                     t.hourly_rate,
@@ -132,10 +133,15 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                 validated.isPaid === false &&
                 Object.keys(body).every((key) => key === "is_paid");
 
-            if (!isUnpayOnly) return jsonError("Paid timesheets cannot be edited.", 400);
+            const isDetailsOnly =
+                Object.keys(body).length > 0 &&
+                Object.keys(body).every((key) => key === "notes" || key === "payer");
+
+            if (!isUnpayOnly && !isDetailsOnly) return jsonError("Paid timesheets only allow changes to Payer & Notes.", 400);
         }
 
         const notesWasProvided = Object.prototype.hasOwnProperty.call(body, "notes");
+        const payerWasProvided = Object.prototype.hasOwnProperty.call(body, "payer");
 
         const result = await db.query(
             `
@@ -147,6 +153,10 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                     notes = CASE
                         WHEN $4::boolean THEN $5
                         ELSE notes
+                    END,
+                    payer = CASE
+                        WHEN $14::boolean THEN $15
+                        ELSE payer
                     END,
                     is_payable = CASE
                         WHEN $6::boolean THEN $7::boolean
@@ -175,6 +185,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                     period_end,
                     status,
                     notes,
+                    payer,
                     is_payable,
                     hourly_rate,
                     is_paid,
@@ -196,6 +207,8 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
                 validated.isPaid ?? false,
                 id,
                 user.id,
+                payerWasProvided,
+                validated.payer ?? null,
             ]
         );
 
@@ -205,16 +218,7 @@ export const PATCH = withUser<Params>(async (req, context, user) => {
 
         return jsonOk({ success: true, timesheet: result[0] });
     } catch (err) {
-        const code = typeof err === "object" && err !== null && "code" in err
-            ? String((err as { code?: unknown }).code)
-            : "";
-
-        if (code === "23505") {
-            return jsonError("A timesheet already exists for this date range.", 400);
-        }
-
         if (err instanceof Error) return jsonError(err.message, 400);
-
         return serverError("PATCH /api/timesheets/[id]", err);
     }
 });
@@ -229,30 +233,46 @@ export const DELETE = withUser<Params>(async (_req, context, user) => {
 
         const access = await getTimesheetAccess(id, user.id);
 
-        if (!access.canEdit) return jsonError("Timesheet not found.", 404);
+        if (!access.isOwner) return jsonError("Timesheet not found.", 404);
 
         const existingResult = await db.query(
             `
-                SELECT status
-                FROM timesheets
-                WHERE id = $1
-                    AND user_id = $2
+                SELECT
+                    t.id,
+                    t.is_paid,
+                    EXISTS (
+                        SELECT 1
+                        FROM time_entries te
+                        WHERE te.timesheet_id = t.id
+                    ) AS has_entries
+                FROM timesheets t
+                WHERE t.id = $1
+                    AND t.user_id = $2
             `,
             [id, user.id]
         );
 
         if (existingResult.length === 0) return jsonError("Timesheet not found.", 404);
+        if (existingResult[0].is_paid) return jsonError("Paid timesheets cannot be deleted.", 400);
+        if (existingResult[0].has_entries) return jsonError("Timesheets with time entries cannot be deleted.", 400);
 
-        if (existingResult[0].status === "finalized") return jsonError("Finalized timesheets cannot be deleted.", 400);
-
-        await db.query(
+        const deleted = await db.query(
             `
-            DELETE FROM timesheets
-            WHERE id = $1
-                AND user_id = $2
-        `,
+                DELETE FROM timesheets
+                WHERE id = $1
+                    AND user_id = $2
+                    AND is_paid = false
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM time_entries
+                        WHERE timesheet_id = $1
+                    )
+                RETURNING id
+            `,
             [id, user.id]
         );
+
+        if (deleted.length === 0) return jsonError("This timesheet can no longer be deleted.", 400);
 
         return jsonOk({ success: true });
     } catch (err) {

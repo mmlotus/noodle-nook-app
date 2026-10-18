@@ -8,6 +8,7 @@ export type TimesheetCreatePayload = {
     notes?: string | null;
     is_payable?: boolean;
     hourly_rate?: string | number | null;
+    payer?: string | null;
 };
 
 export type TimesheetUpdatePayload = {
@@ -18,6 +19,7 @@ export type TimesheetUpdatePayload = {
     is_payable?: boolean;
     hourly_rate?: string | number | null;
     is_paid?: boolean;
+    payer?: string | null;
 };
 
 export type TimeEntryCreatePayload = {
@@ -60,6 +62,7 @@ export type TimesheetSummary = {
     updated_at: string;
     total_minutes: string | number;
     entry_count: string | number;
+    payer: string | null;
 };
 
 export type TimesheetAccess = {
@@ -126,6 +129,7 @@ export type SharedTimesheetSummary = {
     shared_at: string;
     total_minutes: string | number;
     entry_count: string | number;
+    payer: string | null;
 };
 
 export type LiveClockInPayload = {
