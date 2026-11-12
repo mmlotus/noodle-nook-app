@@ -1,0 +1,79 @@
+/* TIMESHEET SUMMARY MODAL */
+
+.summaryModal {
+    width: 480px;
+    max-width: 95vw;
+    padding: 20px;
+    gap: 12px;
+}
+
+.summaryContent {
+    overflow-y: auto;
+    min-height: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.summaryHeader {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.summaryHeader h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.summaryHeader p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.summaryTable th,
+.summaryTable td {
+    padding: 10px 4px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+    white-space: nowrap;
+}
+
+.summaryTable th:last-child,
+.summaryTable td:last-child {
+    text-align: right;
+}
+
+.summaryTotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 8px;
+    margin-top: 16px;
+    border-top: 2px solid var(--border);
+    font-weight: 700;
+}
+
+.summaryTotal strong {
+    font-size: 1.3rem;
+}
+
+@media (max-width: 480px) {
+    .summaryModal {
+        padding: 14px 10px;
+    }
+
+    .summaryTable {
+        font-size: 0.7rem;
+    }
+
+    .summaryTable th,
+    .summaryTable td {
+        padding: 9px 2px;
+    }
+}

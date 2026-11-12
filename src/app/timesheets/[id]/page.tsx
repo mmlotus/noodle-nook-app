@@ -29,6 +29,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Pagination from "@/components/Pagination";
+import TimesheetSummaryModal from "@/components/Timesheets/TimesheetSummaryModal";
 
 export default function TimesheetDetailPage() {
     const params = useParams();
@@ -62,6 +63,7 @@ export default function TimesheetDetailPage() {
 
     const [showTimesheetDetails, setShowTimesheetDetails] = useState(false);
     const [showAddEntry, setShowAddEntry] = useState(false);
+    const [showTimesheetSummary, setShowTimesheetSummary] = useState(false);
 
     const [workDate, setWorkDate] = useState(getTodayDateString());
     const [startTime, setStartTime] = useState("");
@@ -1386,8 +1388,26 @@ export default function TimesheetDetailPage() {
                 )}
 
                 <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "12px",
+                            flexWrap: "wrap",
+                            marginBottom: "20px",
+                        }}
+                    >
                         <h2 className={global.headLeft}>Time Entries</h2>
+
+                        <button
+                            type="button"
+                            className={global.buttonSecondary}
+                            onClick={() => setShowTimesheetSummary(true)}
+                        >
+                            View Summary
+                        </button>
+
                     </div>
 
                     <Pagination
@@ -1546,6 +1566,15 @@ export default function TimesheetDetailPage() {
                     )}
                 </section>
             </div>
+
+            {timesheet && (
+                <TimesheetSummaryModal
+                    isOpen={showTimesheetSummary}
+                    onClose={() => setShowTimesheetSummary(false)}
+                    timesheet={timesheet}
+                    entries={entries}
+                />
+            )}
 
             <BasicModal
                 isOpen={showDeleteTimesheetModal}
