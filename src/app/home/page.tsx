@@ -172,6 +172,29 @@ export default function HomePage() {
                     <button
                         type="button"
                         className={global.homeSectionToggle}
+                        onClick={() => toggleSection("myHome")}
+                        aria-expanded={!isCollapsed("myHome")}
+                    >
+                        <div className={global.subcentered}>My Home</div>
+                        <span className={global.homeSectionChevron} aria-hidden="true">
+                            {isCollapsed("myHome") ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                        </span>
+                    </button>
+
+                    {!isCollapsed("myHome") && (
+                        <div className={global.grid}>
+                            <Link href="/households" className={global.card}>
+                                <h2>Households</h2>
+                                <p>Create & manage your households, as well as those you belong to.</p>
+                            </Link>
+                        </div>
+                    )}
+                </section>
+
+                <section className={global.homeSection}>
+                    <button
+                        type="button"
+                        className={global.homeSectionToggle}
                         onClick={() => toggleSection("myMoney")}
                         aria-expanded={!isCollapsed("myMoney")}
                     >

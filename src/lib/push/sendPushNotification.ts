@@ -48,3 +48,44 @@ export async function sendPushToAllUsers(payload: PushEntry) {
         })
     );
 }
+
+export async function sendPushToUser(userId: string, payload: Pick<PushEntry, "title" | "body" | "url">) {
+    const subscriptions = await db.query(
+        `
+            SELECT ps.id, ps.subscription
+            FROM push_subscriptions ps
+            INNER JOIN users u
+                ON u.id = ps.user_id
+            WHERE ps.user_id = $1
+                AND u.push_notifications_enabled = TRUE
+        `,
+        [userId]
+    );
+
+    console.log("Targeted push:", userId, "Subscriptions:", subscriptions.length);
+
+    await Promise.all(subscriptions.map(async (row) => {
+        try {
+            await webpush.sendNotification(row.subscription, JSON.stringify({
+                title: payload.title,
+                body: payload.body,
+                url: payload.url || "/home",
+            }));
+        } catch (err: unknown) {
+            console.error("Push send error:", err);
+            const statusCode =
+                typeof err === "object" && err !== null && "statusCode" in err
+                    ? (err as { statusCode?: number }).statusCode
+                    : undefined;
+
+            if (statusCode === 404 || statusCode === 410) {
+                await db.query(
+                    `DELETE FROM push_subscriptions WHERE id = $1`,
+                    [row.id]
+                );
+            }
+        }
+    }));
+
+    console.log("Targeted push sent successfully.");
+}
