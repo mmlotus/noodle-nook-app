@@ -38,7 +38,7 @@ export const PATCH = withUser<Promise<{ id: string }>>(
 
             const result = await db.query(
                 `
-                    WITH accepted_invitations AS (
+                    WITH accepted_invitation AS (
                         UPDATE household_invitations
                         SET status = 'accepted',
                             responded_at = NOW()
