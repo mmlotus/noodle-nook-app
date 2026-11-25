@@ -19,6 +19,7 @@ export default function ProfileMain() {
 
     const [pushEnabled, setPushEnabled] = useState(true);
     const [pushLoading, setPushLoading] = useState(false);
+    const [pushTestLoading, setPushTestLoading] = useState(false);
     const [pushDeviceStatus, setPushDeviceStatus] = useState<PushDeviceStatus>({
         supported: false,
         permission: "default",
@@ -140,6 +141,25 @@ export default function ProfileMain() {
         }
     };
 
+    const handleTestPush = async () => {
+        setPushTestLoading(true);
+
+        try {
+            const res = await fetch("/api/push/test", {
+                method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Failed to request test notification.");
+
+            toast.success("Test notification requested!");
+        } catch (err) {
+            console.error("Test notification error:", err);
+            toast.error("Failed to request test notification. Please try again later.");
+        } finally {
+            setPushTestLoading(false);
+        }
+    };
+
     const firstName = name.trim().split(" ")[0] || "";
 
     return (
@@ -258,9 +278,20 @@ export default function ProfileMain() {
                         )}
 
                         {pushEnabled && pushDeviceStatus.subscribed && (
-                            <p className={global.smallText}>
-                                This device is subscribed to push notifications.
-                            </p>
+                            <>
+                                <p className={global.smallText}>
+                                    This device is subscribed to push notifications.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    className={global.button}
+                                    disabled={pushLoading || pushTestLoading}
+                                    onClick={handleTestPush}
+                                >
+                                    {pushTestLoading ? "Sending..." : "Send Test Notification"}
+                                </button>
+                            </>
                         )}
                     </div>
 
