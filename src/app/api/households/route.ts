@@ -34,14 +34,18 @@ export const POST = withUser(async (req, _context, user) => {
 
         if (!name) return jsonError("Household name is required.", 400);
 
+        const color = body.color ?? "#808080";
+        if (typeof color !== "string" || !/^#[0-9a-fA-F]{6}$/.test(color)) return jsonError("Invalid household color.", 400);
+
         const res = await db.query(
             `
                 WITH new_household AS (
                     INSERT INTO households (
                         name,
-                        owner_user_id
+                        owner_user_id,
+                        color
                     )
-                    VALUES ($1, $2)
+                    VALUES ($1, $2, $3)
                     RETURNING *
                 ),
                 new_member AS (
@@ -69,7 +73,7 @@ export const POST = withUser(async (req, _context, user) => {
                 INNER JOIN new_member m
                     ON m.household_id = h.id
             `,
-            [name, user.id]
+            [name, user.id, color]
         );
 
         if (res.length === 0) return jsonError("Household was not created.", 400);

@@ -3,6 +3,7 @@ export type HouseholdRole = "owner" | "admin" | "member";
 export type Household = {
     id: string;
     name: string;
+    color: string;
     owner_user_id: string;
     created_at: string;
     updated_at: string;
@@ -27,6 +28,12 @@ export type HouseholdWithRole = Household & {
 
 export type HouseholdCreatePayload = {
     name: string;
+    color?: string;
+};
+
+export type HouseholdUpdatePayload = {
+    name: string;
+    color?: string;
 };
 
 export type HouseholdDetail = HouseholdWithRole & {

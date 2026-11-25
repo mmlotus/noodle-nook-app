@@ -70,16 +70,20 @@ export const PATCH = withUser<Promise<{ id: string }>>(
 
             if (!name) return jsonError("Household name is required.", 400);
 
+            const color = body.color;
+            if (color !== undefined && (typeof color !== "string" || !/^#[0-9a-fA-F]{6}$/.test(color))) return jsonError("Invalid household color.", 400);
+
             const result = await db.query(
                 `
                     UPDATE households
                     SET name = $2,
+                        color = COALESCE($4, color),
                         updated_at = NOW()
                     WHERE id = $1
                         AND owner_user_id = $3
                     RETURNING *
                 `,
-                [id, name, user.id]
+                [id, name, user.id, color ?? null]
             );
 
             if (result.length === 0) return jsonError("Household not found or permission denied.", 403);

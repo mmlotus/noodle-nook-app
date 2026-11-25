@@ -1,5 +1,6 @@
 "use client";
 
+import ColorPicker from "@/components/ColorPicker";
 import Banner from "@/components/Images/banner";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import BasicModal from "@/components/Modals/PopupModal";
@@ -15,10 +16,14 @@ export default function HouseholdsPage() {
     const router = useRouter();
 
     const [households, setHouseholds] = useState<HouseholdWithRole[]>([]);
+
     const [name, setName] = useState("");
     const [renamingHousehold, setRenamingHousehold] = useState<HouseholdWithRole | null>(null);
     const [householdName, setHouseholdName] = useState("");
     const [savingRename, setSavingRename] = useState(false);
+
+    const [color, setColor] = useState("#808080");
+    const [householdColor, setHouseholdColor] = useState("#808080");
 
     const [deletingHousehold, setDeletingHousehold] = useState<HouseholdWithRole | null>(null);
     const [isDeletingHousehold, setIsDeletingHousehold] = useState(false);
@@ -92,6 +97,7 @@ export default function HouseholdsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: name.trim(),
+                    color,
                 }),
             });
 
@@ -102,6 +108,7 @@ export default function HouseholdsPage() {
 
             setHouseholds((current) => [...current, household].sort((a, b) => a.name.localeCompare(b.name)));
             setName("");
+            setColor("#808080");
             toast.success("Household created!");
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Could not create household.");
@@ -185,11 +192,12 @@ export default function HouseholdsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: householdName.trim(),
+                    color: householdColor,
                 }),
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Could not rename household.");
+            if (!res.ok) throw new Error(data.error || "Could not update household.");
 
             setHouseholds((current) => current.map((household) => household.id === renamingHousehold.id
                 ? { ...household, ...data.household }
@@ -199,10 +207,11 @@ export default function HouseholdsPage() {
 
             setRenamingHousehold(null);
             setHouseholdName("");
-            toast.success("Household renamed!");
+            setHouseholdColor("#808080");
+            toast.success("Household updated!");
         } catch (err) {
             console.error(err);
-            toast.error(err instanceof Error ? err.message : "Could not rename household. Please try again later.");
+            toast.error(err instanceof Error ? err.message : "Could not update household. Please try again later.");
         } finally {
             setSavingRename(false);
         }
@@ -290,16 +299,22 @@ export default function HouseholdsPage() {
                             handleCreateHousehold();
                         }}
                     >
-                        <label className={glob.label}>Household Name</label>
-                        <input
-                            type="text"
-                            className={glob.input}
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Household name"
-                            disabled={saving}
-                            required
-                        />
+                        <ColorPicker
+                            color={color}
+                            onChange={setColor}
+                            label="Household Color"
+                        >
+                            <label className={glob.label}>Household Name</label>
+                            <input
+                                type="text"
+                                className={glob.input}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Household name"
+                                disabled={saving}
+                                required
+                            />
+                        </ColorPicker>
 
                         <button
                             type="submit"
@@ -337,7 +352,12 @@ export default function HouseholdsPage() {
                                         }}
                                     >
                                         <div className={mile.entryDate}>
-                                            <span className={mile.historyValue}>
+                                            <span className={`${mile.historyValue} ${glob.colorName}`}>
+                                                <span
+                                                    className={glob.colorDot}
+                                                    style={{ backgroundColor: household.color }}
+                                                    aria-hidden="true"
+                                                />
                                                 {household.name}
                                             </span>
 
@@ -354,12 +374,13 @@ export default function HouseholdsPage() {
                                                 <button
                                                     type="button"
                                                     className={glob.iconButton}
-                                                    title="Rename Household"
+                                                    title="Edit Household"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         setRenamingHousehold(household);
                                                         setHouseholdName(household.name);
+                                                        setHouseholdColor(household.color);
                                                     }}
                                                 >
                                                     <Pencil size={16} />
@@ -413,17 +434,24 @@ export default function HouseholdsPage() {
 
             <BasicModal
                 isOpen={renamingHousehold !== null}
-                title="Rename Household"
+                title="Edit Household"
                 message={
-                    <input
-                        type="text"
-                        className={glob.input}
-                        value={householdName}
-                        onChange={(e) => setHouseholdName(e.target.value)}
-                        disabled={savingRename}
-                        placeholder="Household Name"
-                        autoFocus
-                    />
+                    <ColorPicker
+                        color={householdColor}
+                        onChange={setHouseholdColor}
+                        label="Household Color"
+                    >
+                        <label className={glob.label}>Household Name</label>
+                        <input
+                            type="text"
+                            className={glob.input}
+                            value={householdName}
+                            onChange={(e) => setHouseholdName(e.target.value)}
+                            disabled={savingRename}
+                            placeholder="Household Name"
+                            autoFocus
+                        />
+                    </ColorPicker>
                 }
                 confirmText={savingRename ? "Saving..." : "Save"}
                 cancelText="Cancel"
@@ -433,6 +461,7 @@ export default function HouseholdsPage() {
                     if (!savingRename) {
                         setRenamingHousehold(null);
                         setHouseholdName("");
+                        setHouseholdColor("#808080");
                     }
                 }}
             />

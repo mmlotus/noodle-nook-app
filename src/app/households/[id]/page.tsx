@@ -1,5 +1,6 @@
 "use client";
 
+import ColorPicker from "@/components/ColorPicker";
 import Banner from "@/components/Images/banner";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import BasicModal from "@/components/Modals/PopupModal";
@@ -376,7 +377,13 @@ export default function HouseholdDetailPage() {
                         {household.members.map((member) => (
                             <div key={member.id} className={glob.item}>
                                 <div className={glob.itemHeader}>
-                                    <span>{member.display_name}</span>
+                                    <span className={glob.colorName}>
+                                        <span
+                                            className={glob.colorDot}
+                                            style={{ backgroundColor: member.color }}
+                                        />
+                                        {member.display_name}
+                                    </span>
 
                                     <div>
                                         {canTransferTo(member) && (
@@ -436,21 +443,19 @@ export default function HouseholdDetailPage() {
                                     handleAddMember();
                                 }}
                             >
-                                <label className={glob.label}>Display Name</label>
-                                <input
-                                    type="text"
-                                    className={glob.input}
-                                    value={memberName}
-                                    onChange={(e) => setMemberName(e.target.value)}
-                                    required
-                                />
-
-                                <label className={glob.label}>Profile Color</label>
-                                <input
-                                    type="color"
-                                    value={memberColor}
-                                    onChange={(e) => setMemberColor(e.target.value)}
-                                />
+                                <ColorPicker
+                                    color={memberColor}
+                                    onChange={setMemberColor}
+                                >
+                                    <label className={glob.label}>Display Name</label>
+                                    <input
+                                        type="text"
+                                        className={glob.input}
+                                        value={memberName}
+                                        onChange={(e) => setMemberName(e.target.value)}
+                                        required
+                                    />
+                                </ColorPicker>
 
                                 <button
                                     type="submit"
@@ -575,30 +580,29 @@ export default function HouseholdDetailPage() {
                     title="Edit Household Member"
                     message={
                         <div className={glob.form}>
-                            <label className={glob.label}>Display Name</label>
-
-                            <input
-                                type="text"
-                                className={glob.input}
-                                value={editingMember.display_name}
-                                onChange={(e) => setEditingMember({
-                                    ...editingMember,
-                                    display_name: e.target.value,
-                                })}
-                                disabled={savingEdit}
-                            />
-
-                            <label className={glob.label}>Profile Color</label>
-
-                            <input
-                                type="color"
-                                value={editingMember.color}
-                                onChange={(e) => setEditingMember({
-                                    ...editingMember,
-                                    color: e.target.value,
-                                })}
-                                disabled={savingEdit}
-                            />
+                            <ColorPicker
+                                color={editingMember.color}
+                                onChange={(color) =>
+                                    setEditingMember({
+                                        ...editingMember,
+                                        color,
+                                    })
+                                }
+                            >
+                                <label className={glob.label}>Display Name</label>
+                                <input
+                                    type="text"
+                                    className={glob.input}
+                                    value={editingMember.display_name}
+                                    onChange={(e) =>
+                                        setEditingMember({
+                                            ...editingMember,
+                                            display_name: e.target.value,
+                                        })
+                                    }
+                                    disabled={savingEdit}
+                                />
+                            </ColorPicker>
 
                             {household.role === "owner" &&
                                 editingMember.role !== "owner" &&

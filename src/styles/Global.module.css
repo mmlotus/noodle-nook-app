@@ -746,6 +746,48 @@
   color: var(--btn-secondary);
 }
 
+.colorPicker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(100px, 35%);
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+}
+
+.colorPickerFields,
+.colorPickerPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.colorPicker :global(.react-colorful) {
+  width: 100%;
+  height: 125px;
+}
+
+.colorName {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.colorDot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .colorPicker {
+    gap: 12px;
+  }
+}
+
+
 /* FILTER FORMATS */
 .filterBtn {
   display: inline-flex;
