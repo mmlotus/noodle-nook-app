@@ -4,6 +4,8 @@ import db from "@/lib/db";
 
 type PushSubscriptionPayload = {
     subscription?: PushSubscriptionJSON;
+    syncOnly?: boolean;
+    previousEndpoint?: string;
 };
 
 export const POST = withUser(async (req, _context, user) => {
@@ -13,6 +15,50 @@ export const POST = withUser(async (req, _context, user) => {
 
         if (!subscription || !subscription.endpoint) {
             return jsonError("Missing or invalid push subscription.", 400);
+        }
+
+        if (body.syncOnly === true) {
+            const result = await db.query(
+                `
+                    INSERT INTO push_subscriptions (
+                        user_id,
+                        endpoint,
+                        subscription,
+                        updated_at
+                    )
+                    SELECT id, $2, $3, NOW()
+                    FROM users
+                    WHERE id = $1
+                        AND push_notifications_enabled = TRUE
+                    ON CONFLICT (endpoint)
+                    DO UPDATE SET
+                        user_id = EXCLUDED.user_id,
+                        subscription = EXCLUDED.subscription,
+                        updated_at = NOW()
+                    RETURNING id
+                `,
+                [user.id, subscription.endpoint, JSON.stringify(subscription)]
+            );
+
+            if (
+                result.length > 0 &&
+                typeof body.previousEndpoint === "string" &&
+                body.previousEndpoint !== subscription.endpoint
+            ) {
+                await db.query(
+                    `
+                        DELETE FROM push_subscriptions
+                        WHERE user_id = $1
+                            AND endpoint = $2
+                    `,
+                    [user.id, body.previousEndpoint]
+                );
+            }
+
+            return jsonOk({
+                success: true,
+                synced: result.length > 0,
+            });
         }
 
         await db.query(

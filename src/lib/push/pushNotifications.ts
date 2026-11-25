@@ -28,6 +28,82 @@ export async function getPushDeviceStatus(): Promise<PushDeviceStatus> {
     return { supported: true, permission: Notification.permission, subscribed: Boolean(subscription) };
 }
 
+const PUSH_RENEWAL_INTERVAL = 30 * 24 * 60 * 60 * 1000;
+const PUSH_RENEWAL_KEY = "noodlenook_push_last_renewal";
+
+let pushSyncInProgress = false;
+
+export async function syncPushSubscription() {
+    if (typeof window === "undefined") return;
+    if (pushSyncInProgress) return;
+
+    if (
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window) ||
+        !("Notification" in window)
+    ) return;
+
+    if (Notification.permission !== "granted") return;
+
+    pushSyncInProgress = true;
+
+    try {
+        const profileRes = await fetch("/api/profiles/user-profile", {
+            cache: "no-store",
+        });
+        if (!profileRes.ok) return;
+
+        const profile = await profileRes.json();
+        if (profile.push_notifications_enabled !== true) return;
+
+        const registration = await navigator.serviceWorker.ready;
+
+        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicKey) throw new Error("Missing NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+
+        let subscription = await registration.pushManager.getSubscription();
+        let previousEndpoint: string | undefined;
+
+        const lastRenewal = Number(localStorage.getItem(PUSH_RENEWAL_KEY) || "0");
+
+        const isAndroidChrome =
+            /Android/i.test(navigator.userAgent) &&
+            /Chrome\//i.test(navigator.userAgent);
+
+        const renewalDue = Date.now() - lastRenewal >= PUSH_RENEWAL_INTERVAL;
+
+        if (subscription && isAndroidChrome && renewalDue && profile.email === "mmccoyinfo@gmail.com") {
+            const oldEndpoint = subscription.endpoint;
+
+            localStorage.setItem(PUSH_RENEWAL_KEY, Date.now().toString());
+
+            const unsubscribed = await subscription.unsubscribe();
+
+            if (unsubscribed) {
+                previousEndpoint = oldEndpoint;
+                subscription = null;
+            }
+        }
+
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicKey),
+            });
+
+            await savePushSubscription(subscription, true, previousEndpoint);
+
+            localStorage.setItem(PUSH_RENEWAL_KEY, Date.now().toString());
+
+            return;
+        }
+
+        await savePushSubscription(subscription, true);
+    } finally {
+        pushSyncInProgress = false;
+    }
+}
+
 export async function enablePushNotifications() {
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
         throw new Error("Push notifications not supported");
@@ -41,6 +117,9 @@ export async function enablePushNotifications() {
 
     if (existingSubscription) {
         await savePushSubscription(existingSubscription);
+
+        localStorage.setItem(PUSH_RENEWAL_KEY, Date.now().toString());
+
         return existingSubscription;
     }
 
@@ -53,6 +132,9 @@ export async function enablePushNotifications() {
     });
 
     await savePushSubscription(subscription);
+
+    localStorage.setItem(PUSH_RENEWAL_KEY, Date.now().toString());
+
     return subscription;
 }
 
@@ -71,11 +153,11 @@ export async function disablePushNotifications() {
     await deletePushSubscription();
 }
 
-async function savePushSubscription(subscription: PushSubscription) {
+async function savePushSubscription(subscription: PushSubscription, syncOnly = false, previousEndpoint?: string) {
     const res = await fetch("/api/push", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscription }),
+        body: JSON.stringify({ subscription, syncOnly, previousEndpoint }),
     });
 
     if (!res.ok) {
