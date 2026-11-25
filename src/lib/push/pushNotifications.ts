@@ -72,7 +72,7 @@ export async function syncPushSubscription() {
 
         const renewalDue = Date.now() - lastRenewal >= PUSH_RENEWAL_INTERVAL;
 
-        if (subscription && isAndroidChrome && renewalDue && profile.email === "mmccoyinfo@gmail.com") {
+        if (subscription && isAndroidChrome && renewalDue) {
             const oldEndpoint = subscription.endpoint;
 
             localStorage.setItem(PUSH_RENEWAL_KEY, Date.now().toString());
